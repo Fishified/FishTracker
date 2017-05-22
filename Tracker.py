@@ -1,6 +1,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import QFileDialog
+from functools import partial 
 import sys
 import cv2
 import time
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 import tracker_ui
 import os
+import temp
 from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
 
 from matplotlib.figure import Figure
@@ -16,6 +18,9 @@ from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
+
+def appendAnything(self, app):
+    app.textEdit.append("test")
 
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
@@ -34,12 +39,14 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.gaussSlider.valueChanged.connect(self.gaussSliderChange)
         self.medianSlider.valueChanged.connect(self.medianSliderChange)
         self.kernelSlider.valueChanged.connect(self.kernelSliderChange)
+        
         self.contourButton.clicked.connect(self.contour)
         self.loadcalibrateButton.clicked.connect(self.opencalibration)
         self.calibrateButton.clicked.connect(self.calibration)
         self.stitchButton.clicked.connect(self.stitch)
         self.stitchDirectoryButton.clicked.connect(self.openstitch)
         self.populatecameraslineEdit.returnPressed.connect(self.populatecameralist)
+        
         try:
             self.reloadButton.clicked.connect(lambda: self.output(self.rawcoordinates, self.signalemission))
         except AttributeError:
@@ -54,6 +61,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.medianValueLabel.setText(str(self.medianSlider.value()))
     def kernelSliderChange(self):
         self.kernelValueLabel.setText(str(self.kernelSlider.value()))
+
+
+        
     def play_movie(self):
         path, filename=os.path.split(os.path.abspath(self.video))
         path='%s\\'%path
@@ -78,11 +88,11 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         fgbg=cv2.BackgroundSubtractorMOG()
         
         count = 0
-        xdist=[]
-        ydist=[]
-        ix,iy=-1,-1
-        firstFrame = None
-        counter=0
+#        xdist=[]
+#        ydist=[]
+#        ix,iy=-1,-1
+#        firstFrame = None
+#        counter=0
         xcoord=[]
         ycoord=[]
         cx=0
@@ -91,23 +101,27 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
         while(True):
             if count==0:
-                self.textEdit.setText("Mouseover video window and 'q' to cancel")
+                self.textEdit.setText("Tracking. Click video window and press 'q' or click 'Stop' button to cancel")
             if self.trackButton.isChecked()== False:
                 self.scene.clear()
                 self.trackButton.setText('Play')
                 break
             else:
                 self.trackButton.setText('Stop')
+                
             (grabbed, frame) = cap.read()
             originalframe=frame
+            
             if not grabbed:
                 self.trackButton.setChecked(False)
                 self.trackButton.setText('Play')
+                self.textEdit.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
                 break           
             
             currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 #            currentframe = imutils.resize(currentframe, width=800)
             
+            #fills in timestamp digits to prevent detection
             if self.removeDigitsCheckBox.isChecked() == True:
                 currentframe[np.where((currentframe == [255,255,255]).all(axis = 2))] = [0,0,0]            
             
@@ -167,35 +181,41 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
         
-            biggestcontour=cntarea.index(max(cntarea))#almost always the fish, this is where glare can cause problems
+            biggestcontour=cntarea.index(max(cntarea))#almost always the fish, this is where glare can cause problems if the biggest contour is bigger than the fish's contour
             xcoord.append(xcntcoord[biggestcontour])
             ycoord.append(ycntcoord[biggestcontour])
+            
             if xcntcoord[biggestcontour]==0:
                 pass
             else:
                 cv2.circle(originalframe, (xcntcoord[biggestcontour], ycntcoord[biggestcontour]),r,(0, 255, 0), 3)
-            fishcoords=np.array((xcoord,ycoord),dtype=float)
+                
+            fishcoords=np.array((xcoord,ycoord),dtype=float) #attributes coordinates of largest contour to fish coordinates
              
             for i in range(len(xcoord)):
                 if xcoord[i]==0:
                     pass
                 else:
                     cv2.circle(originalframe, (xcoord[i], ycoord[i]),6, (0, 0, 255),thickness=-1)
-#                self.textEdit.append("First detection on frame: %d" % count)
+                    if i == len(xcoord)-1:
+                        self.textEdit.append("Detection on frame: %d" % count)
                 
-#            originalframe = imutils.resize(originalframe, width=500)
+
             if self.novidCheckBox.isChecked()==False:
-                
+                #time.sleep(0.00001)
                 cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
                 cv2.imshow("Background removed",currentframe)               
-                
                 cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL) 
                 cv2.imshow("Tracking",originalframe)   
             
+            #variables used to increase/decrease video playback speed
+            self.vidSpeedMultiplier=int(self.playbackSlider.value())
             self.framerate=float(self.framerate)
-            a=1/self.framerate
+            a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
+            
             if self.novidCheckBox.isChecked()==False:
                 time.sleep(a)
+                #breaks out 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.trackButton.setChecked(False)
                     self.trackButton.setText('Play')
@@ -205,6 +225,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             
         cap.release()
         cv2.destroyAllWindows()
+        
+
+        
         fishcoords=np.transpose(fishcoords)
         fishcoords=pd.DataFrame(fishcoords)
         fishcoords.to_csv("%s%s_raw.csv" %(path,cameraID))
@@ -227,12 +250,16 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 #        Spurious data mostly results from surface glare causing movement contours with roughly the same surface area (pixels)
 #        as the size of the fish. The first approach (1) against spuriuos data is to vary cntareathreshold (defined at top) to try and eliminate small erroneous contours.
 #        Usually this is a good approach, especially if the fish is large and you have low glare on the surface. Nevertheless, there are some erroneous
-#        contours that leak in. So I came up with approaches 2 and 3 to deal further with these. Defense (2) checks detected coordinates to see if they are
+#        contours that leak in. So I came up with approaches 2 and 3 to deal further with these. Approach (2) checks detected coordinates to see if they are
 #        alone (i.e. the rows above and below are zero), if they are alone then they get taken out. Defense (3) calculates a 2 period rolling standard deviation
 #        (rSTD) over the xCoord key. By default the rSTD threshold is 200, this helps remove groups of two or three spurious detections. The downside is that 
-#        the first row of good data in a block is lost becuase it will inevitably have a rSTD > 200. A small price to pay for good clean data. 
+#        the first row of good data in a block is lost becuase it will inevitably have a rSTD > 200. A small price to pay for good data. 
 #        """
-    
+            
+        first=className.className()#create instance of className called 'first'
+        first.createName('bucky') #create a name using the createName method available in className
+        self.textEdit.append(first.name) #output first's name to the text console
+        
     def output(self,x,y):
         
         fishcoords=pd.DataFrame(self.rawcoordinates)
@@ -344,8 +371,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.scene.update()
         self.graphicsView.setScene(self.scene)
         
-
-           
     def preview(self):
         cap = cv2.VideoCapture(self.video)
         
@@ -355,16 +380,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             if not grabbed:
                 break                 
             currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            currentframe = imutils.resize(currentframe, width=800)
 
             height, width = currentframe.shape[:2]
-            self.scene.clear()
-            self.frame = QImage(currentframe.data, width, height, QImage.Format_RGB888)
-            self.scene.addPixmap(QPixmap.fromImage(self.frame))
-            self.scene.update()
-            self.graphicsView.setScene(self.scene)
-            QApplication.processEvents()
-#            time.sleep(0.037)
+            
+            cv2.namedWindow("Preview", cv2.WINDOW_NORMAL) 
+            cv2.imshow("Preview",currentframe)  
+            self.textEdit.setText("Playing preview. Click video window and press 'q' or click 'Stop' button to cancel")
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break  
         cap.release()

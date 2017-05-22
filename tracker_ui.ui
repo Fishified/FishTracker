@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>598</width>
-    <height>1001</height>
+    <width>993</width>
+    <height>981</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -323,10 +323,20 @@
                  <string>Video</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="0" column="0">
+                 <item row="7" column="1">
+                  <widget class="QLabel" name="label_21">
+                   <property name="text">
+                    <string>Help box:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
                   <widget class="QGroupBox" name="groupBox_7">
+                   <property name="toolTip">
+                    <string>Video loading functions</string>
+                   </property>
                    <property name="title">
-                    <string>GroupBox</string>
+                    <string>Video loading</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_8">
                     <item row="0" column="0">
@@ -346,7 +356,7 @@
                     <item row="6" column="0">
                      <widget class="QLabel" name="label_10">
                       <property name="text">
-                       <string>Video loaded:</string>
+                       <string>Video path:</string>
                       </property>
                      </widget>
                     </item>
@@ -365,7 +375,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>TextLabel</string>
+                       <string>No video loaded</string>
                       </property>
                       <property name="scaledContents">
                        <bool>false</bool>
@@ -428,6 +438,9 @@
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="toolTip">
+                       <string>Enter camera ID (ex. last two digits of IP address)</string>
+                      </property>
                       <property name="text">
                        <string>10</string>
                       </property>
@@ -436,11 +449,92 @@
                       </property>
                      </widget>
                     </item>
+                    <item row="2" column="2">
+                     <spacer name="horizontalSpacer_2">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
                    </layout>
                   </widget>
                  </item>
-                 <item row="1" column="0">
-                  <widget class="QTextEdit" name="textEdit"/>
+                 <item row="2" column="1">
+                  <widget class="QCheckBox" name="novidCheckBox">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Will track video, produce an output file if &quot;Produce output files&quot; is checked but will not show the video tracking.</string>
+                   </property>
+                   <property name="text">
+                    <string>Surpress video</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QCheckBox" name="outputCheckBox">
+                   <property name="text">
+                    <string>Produce output files</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QSlider" name="playbackSlider">
+                   <property name="toolTip">
+                    <string>Speed up or slow down video</string>
+                   </property>
+                   <property name="minimum">
+                    <number>10</number>
+                   </property>
+                   <property name="maximum">
+                    <number>1000</number>
+                   </property>
+                   <property name="value">
+                    <number>100</number>
+                   </property>
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="tickPosition">
+                    <enum>QSlider::TicksBelow</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QPushButton" name="trackButton">
+                   <property name="toolTip">
+                    <string>Starts object tracking on currently loaded video.</string>
+                   </property>
+                   <property name="text">
+                    <string>Track</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLabel" name="label_control_Playback">
+                   <property name="text">
+                    <string>Control video playback speed:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QTextBrowser" name="textEdit"/>
                  </item>
                 </layout>
                </widget>
@@ -452,48 +546,9 @@
           <item>
            <widget class="QGroupBox" name="groupBox_4">
             <property name="title">
-             <string>Preprocessing</string>
+             <string>Video processing</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_6">
-             <item row="3" column="0">
-              <widget class="QPushButton" name="trackButton">
-               <property name="text">
-                <string>Track</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="novidCheckBox">
-               <property name="text">
-                <string>surpress video</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QGroupBox" name="groupBox_9">
-               <property name="title">
-                <string>Output</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_10">
-                <item row="0" column="1">
-                 <widget class="QCheckBox" name="outputCheckBox">
-                  <property name="text">
-                   <string>Produce output files</string>
-                  </property>
-                  <property name="checked">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
              <item row="0" column="0" colspan="2">
               <widget class="QGroupBox" name="groupBox_2">
                <property name="toolTip">
@@ -721,15 +776,25 @@
                <zorder>contourButton</zorder>
               </widget>
              </item>
-             <item row="5" column="0" colspan="2">
+             <item row="4" column="0" colspan="2">
               <widget class="QGroupBox" name="groupBox_12">
                <property name="enabled">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="title">
                 <string>Stitch</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_9">
+                <item>
+                 <widget class="QCheckBox" name="enablestitchCheckBox">
+                  <property name="toolTip">
+                   <string>Allows user to stitch together kinematics data from multiple cameras. Tip - perform error removal on each individual camera beforehand.</string>
+                  </property>
+                  <property name="text">
+                   <string>Enable multi-camera stitching</string>
+                  </property>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QPushButton" name="stitchDirectoryButton">
                   <property name="text">
@@ -757,16 +822,6 @@
                </layout>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QCheckBox" name="enablestitchCheckBox">
-               <property name="toolTip">
-                <string>Allows user to stitch together kinematics data from multiple cameras. Tip - perform error removal on each individual camera beforehand.</string>
-               </property>
-               <property name="text">
-                <string>Enable multi-camera stitching</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -775,7 +830,7 @@
         <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox_3">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="title">
            <string>Plotting</string>
@@ -784,7 +839,7 @@
            <item>
             <widget class="QWidget" name="widget" native="true">
              <property name="enabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
@@ -1058,7 +1113,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>598</width>
+     <width>993</width>
      <height>21</height>
     </rect>
    </property>
