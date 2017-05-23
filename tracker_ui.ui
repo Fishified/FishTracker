@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>993</width>
-    <height>981</height>
+    <width>1032</width>
+    <height>696</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,6 +26,9 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -36,14 +39,14 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="movable">
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
-        <string>Calibration</string>
+        <string>Camera calibration</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
@@ -69,7 +72,7 @@
             </spacer>
            </item>
            <item row="0" column="1">
-            <widget class="QPushButton" name="calibrateButton">
+            <widget class="QPushButton" name="calibrate_B">
              <property name="text">
               <string>Calibrate</string>
              </property>
@@ -82,14 +85,14 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
-               <widget class="QPushButton" name="loadcalibrateButton">
+               <widget class="QPushButton" name="loadcalibrate_B">
                 <property name="text">
                  <string>Load video for calibration</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="calibrateVideoLabel">
+               <widget class="QLabel" name="calVideo_L">
                 <property name="text">
                  <string>TextLabel</string>
                 </property>
@@ -104,15 +107,15 @@
               <string>Parameters</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_12">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_12">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_14">
                 <property name="text">
-                 <string>Enter trial index:</string>
+                 <string>Distance between points 1 and 2 (m):</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="calTrialIndexLineEdit">
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="cameraID_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -140,8 +143,8 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="calCamIDLineEdit">
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="trialIndex_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -162,15 +165,15 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_14">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_12">
                 <property name="text">
-                 <string>Distance between points 1 and 2 (m):</string>
+                 <string>Enter trial index:</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLineEdit" name="calDist2pointsLineEdit">
+               <widget class="QLineEdit" name="distance2pnts_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -199,7 +202,7 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="QLineEdit" name="calreferenceLineEdit">
+               <widget class="QLineEdit" name="refDistance_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -217,6 +220,13 @@
                   <width>60</width>
                   <height>16777215</height>
                  </size>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QPushButton" name="makeCalFile_B">
+                <property name="text">
+                 <string>Make calibration files</string>
                 </property>
                </widget>
               </item>
@@ -292,17 +302,27 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <spacer name="horizontalSpacer">
+         <widget class="QTextEdit" name="cal_TE"/>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>20</width>
+            <height>40</height>
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="calClearTE_B">
+          <property name="text">
+           <string>Clear</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -320,7 +340,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox">
                 <property name="title">
-                 <string>Video</string>
+                 <string>Tracking</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_2">
                  <item row="7" column="1">
@@ -336,7 +356,7 @@
                     <string>Video loading functions</string>
                    </property>
                    <property name="title">
-                    <string>Video loading</string>
+                    <string>Load single video</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_8">
                     <item row="0" column="0">
@@ -534,7 +554,7 @@
                   </widget>
                  </item>
                  <item row="6" column="1">
-                  <widget class="QTextBrowser" name="textEdit"/>
+                  <widget class="QTextBrowser" name="track_TE"/>
                  </item>
                 </layout>
                </widget>
@@ -827,230 +847,247 @@
           </item>
          </layout>
         </item>
-        <item row="1" column="0">
-         <widget class="QGroupBox" name="groupBox_3">
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_5">
+       <attribute name="title">
+        <string>Post-processing</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="groupBox_9">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="title">
-           <string>Plotting</string>
+           <string>Post-processing</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QWidget" name="widget" native="true">
+            <widget class="QWidget" name="widget_2" native="true">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
-              <item row="0" column="0">
-               <widget class="QGroupBox" name="groupBox_8">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>175</height>
-                 </size>
-                </property>
+             <layout class="QGridLayout" name="gridLayout_10">
+              <item row="3" column="2">
+               <widget class="QGroupBox" name="groupBox_15">
                 <property name="title">
-                 <string>Post-processing</string>
+                 <string>Interpolation and cropping</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_9">
-                 <item row="0" column="2">
-                  <widget class="QGroupBox" name="groupBox_5">
-                   <property name="title">
-                    <string>Interpolation and cropping</string>
-                   </property>
-                   <layout class="QGridLayout" name="gridLayout_14">
-                    <item row="0" column="0">
-                     <widget class="QCheckBox" name="interpolateCheckBox">
-                      <property name="text">
-                       <string>Interpolate missing values</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QCheckBox" name="cropCheckBox">
-                      <property name="text">
-                       <string>Crop output</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="label_3">
-                      <property name="text">
-                       <string>Start Frame:</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QLineEdit" name="cropstartLineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>30</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="label_4">
-                      <property name="text">
-                       <string>End Frame:</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="0">
-                     <widget class="QLabel" name="maLabel">
-                      <property name="text">
-                       <string>MA periods:</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="1">
-                     <widget class="QLineEdit" name="cropendLineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>30</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>0</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="4" column="1">
-                     <widget class="QLineEdit" name="maLineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>30</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="toolTip">
-                       <string>Number of periods for the moving averages</string>
-                      </property>
-                      <property name="text">
-                       <string>10</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
+                <layout class="QGridLayout" name="gridLayout_17">
                  <item row="0" column="0">
-                  <widget class="QGroupBox" name="groupBox_13">
-                   <property name="title">
-                    <string>Error removal</string>
+                  <widget class="QCheckBox" name="interpolateCheckBox_2">
+                   <property name="text">
+                    <string>Interpolate missing values</string>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_15">
-                    <item row="0" column="0">
-                     <widget class="QCheckBox" name="removelonersCheckBox">
-                      <property name="text">
-                       <string>Remove lone values</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QCheckBox" name="rSTDCheckBox">
-                      <property name="text">
-                       <string>Perform rSTD removal</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QLabel" name="label_8">
-                      <property name="text">
-                       <string>rSTD periods</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="1">
-                     <widget class="QLineEdit" name="rstd_periods_LineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>30</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="0">
-                     <widget class="QLabel" name="label_7">
-                      <property name="text">
-                       <string>rSTD threshold</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="3" column="1">
-                     <widget class="QLineEdit" name="rstd_threshold_LineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>30</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
                   </widget>
                  </item>
-                 <item row="7" column="0">
-                  <widget class="QPushButton" name="reloadButton">
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="cropCheckBox_2">
                    <property name="text">
-                    <string>Refresh plot</string>
+                    <string>Crop output</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_22">
+                   <property name="text">
+                    <string>Start Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="cropstartLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_23">
+                   <property name="text">
+                    <string>End Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="maLabel_2">
+                   <property name="text">
+                    <string>MA periods:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="cropendLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLineEdit" name="maLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Number of periods for the moving averages</string>
+                   </property>
+                   <property name="text">
+                    <string>10</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
+              <item row="3" column="0">
+               <widget class="QGroupBox" name="groupBox_16">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="title">
+                 <string>False detection removal</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_18">
+                 <item row="0" column="0">
+                  <widget class="QCheckBox" name="removelonersCheckBox_2">
+                   <property name="text">
+                    <string>Remove lone values</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="rSTDCheckBox_2">
+                   <property name="text">
+                    <string>Perform rSTD removal</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_24">
+                   <property name="text">
+                    <string>rSTD periods</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="rstd_periods_LineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_25">
+                   <property name="text">
+                    <string>rSTD threshold</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="rstd_threshold_LineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="ppFileOpen_B">
+                <property name="text">
+                 <string>Choose file ...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Working on this file:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="ppFileLoaded_L">
+                <property name="text">
+                 <string>No file specified</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
            <item>
-            <widget class="QGraphicsView" name="graphicsView">
+            <widget class="QPushButton" name="ppExecute_B">
+             <property name="text">
+              <string>Post-process</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="ppRefresh_B">
+             <property name="text">
+              <string>Refresh table</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGraphicsView" name="graphicsView_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -1068,6 +1105,9 @@
           </layout>
          </widget>
         </item>
+        <item>
+         <widget class="QTableView" name="pp_TV"/>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -1077,6 +1117,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <widget class="QTabWidget" name="tabWidget_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>
@@ -1113,7 +1156,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>993</width>
+     <width>1032</width>
      <height>21</height>
     </rect>
    </property>

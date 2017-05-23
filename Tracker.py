@@ -5,12 +5,15 @@ from functools import partial
 import sys
 import cv2
 import time
-import imutils
+import videoTracking
 import numpy as np
 import pandas as pd
 import tracker_ui
+import calibration
 import os
-import temp
+import postProcessing
+
+
 from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
 
 from matplotlib.figure import Figure
@@ -19,39 +22,50 @@ from matplotlib.backends.backend_qt4agg import (
     NavigationToolbar2QT as NavigationToolbar)
 
 
-def appendAnything(self, app):
-    app.textEdit.append("test")
-
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
-
+    #initiation function on start-up
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         
-        
         self.scene=QGraphicsScene()
         self.scene2=QGraphicsScene()
+        
+        #initiate global lists
         self.cameralist=[]
+      
+        
+        #initiate signals
+        
+        #buttons
         self.trackButton.clicked.connect(self.play_movie)
         self.loadButton.clicked.connect(self.open)
         self.previewButton.clicked.connect(self.preview)
+        self.contourButton.clicked.connect(self.contour)
+        self.ppFileOpen_B.clicked.connect(self.pp_openCSV)
+        self.ppExecute_B.clicked.connect(self.initiatepostProcessing)
+        self.loadcalibrate_B.clicked.connect(self.initiateCalibrate)
+        self.makeCalFile_B.clicked.connect(self.outputCalFile)
+        self.calClearTE_B.clicked.connect(self.textEditClear)
+        
+        self.calibrate_B.clicked.connect(self.doCalibration)
+        self.stitchButton.clicked.connect(self.stitch)
+        self.stitchDirectoryButton.clicked.connect(self.openstitch)
+        
+        #sliders
         self.gaussSlider.valueChanged.connect(self.gaussSliderChange)
         self.medianSlider.valueChanged.connect(self.medianSliderChange)
         self.kernelSlider.valueChanged.connect(self.kernelSliderChange)
         
-        self.contourButton.clicked.connect(self.contour)
-        self.loadcalibrateButton.clicked.connect(self.opencalibration)
-        self.calibrateButton.clicked.connect(self.calibration)
-        self.stitchButton.clicked.connect(self.stitch)
-        self.stitchDirectoryButton.clicked.connect(self.openstitch)
+        
         self.populatecameraslineEdit.returnPressed.connect(self.populatecameralist)
         
         try:
             self.reloadButton.clicked.connect(lambda: self.output(self.rawcoordinates, self.signalemission))
         except AttributeError:
             pass
-        
+    
     def populatecameralist(self):
         self.cameralist.append(self.populatecameraslineEdit.text())
         self.populatecameraslineEdit.clear()
@@ -62,37 +76,29 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def kernelSliderChange(self):
         self.kernelValueLabel.setText(str(self.kernelSlider.value()))
 
-
-        
     def play_movie(self):
-        path, filename=os.path.split(os.path.abspath(self.video))
-        path='%s\\'%path
-        cameraID=int(self.cameraIdLineEdit.text())
-        try:
-            tag=int(path[-15:-3])                     #extract tag number from path
-            attempt=int(path[-2])
-            trial=int(path[-17])
-        except ValueError:
-            tag=None
-            attempt=None
-            trial=None
-
+        
         
         self.framerate=int(self.frameratelineEdit.text())
-        self.label_3.setText(self.video)
+        self.cameraID=int(self.cameraIdLineEdit.text())
         
+        self.path, filename=os.path.split(os.path.abspath(self.video))
+        self.path='%s\\'%self.path
 
-#        treatedfishcoords=kn.kinematics(fishcoords,crop,cropstart,cropend,interpolate,framerate,rollingperiods,path,trial,tag,attempt)
-        tree=str(self.video)
-        cap = cv2.VideoCapture(tree)
-        fgbg=cv2.BackgroundSubtractorMOG()
+        try:
+            self.tag=int(self.path[-15:-3])                     #extract tag number from path
+            self.attempt=int(self.path[-2])
+            self.trial=int(self.path[-17])
+        except ValueError:
+            self.tag=None
+            self.attempt=None
+            self.trial=None
+
+        self.vidstr=str(self.video)
+        self.cap = cv2.VideoCapture(self.vidstr)
+        self.fgbg=cv2.BackgroundSubtractorMOG()
         
         count = 0
-#        xdist=[]
-#        ydist=[]
-#        ix,iy=-1,-1
-#        firstFrame = None
-#        counter=0
         xcoord=[]
         ycoord=[]
         cx=0
@@ -100,8 +106,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         r=20
 
         while(True):
+            
             if count==0:
-                self.textEdit.setText("Tracking. Click video window and press 'q' or click 'Stop' button to cancel")
+                self.track_TE.setText("Tracking. Click video window and press 'q' or click 'Stop' button to cancel")
             if self.trackButton.isChecked()== False:
                 self.scene.clear()
                 self.trackButton.setText('Play')
@@ -109,17 +116,16 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             else:
                 self.trackButton.setText('Stop')
                 
-            (grabbed, frame) = cap.read()
+            (grabbed, frame) = self.cap.read()
             originalframe=frame
             
             if not grabbed:
                 self.trackButton.setChecked(False)
                 self.trackButton.setText('Play')
-                self.textEdit.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
+                self.track_TE.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
                 break           
             
             currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#            currentframe = imutils.resize(currentframe, width=800)
             
             #fills in timestamp digits to prevent detection
             if self.removeDigitsCheckBox.isChecked() == True:
@@ -127,7 +133,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             
             #backgroundSubtractor
             if self.backgroundCheckBox.isChecked() == True:
-                currentframe = fgbg.apply(currentframe)
+                currentframe = self.fgbg.apply(currentframe)
             
             #median filter
             medianFiltersize=int(self.medianSlider.value())
@@ -190,7 +196,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             else:
                 cv2.circle(originalframe, (xcntcoord[biggestcontour], ycntcoord[biggestcontour]),r,(0, 255, 0), 3)
                 
-            fishcoords=np.array((xcoord,ycoord),dtype=float) #attributes coordinates of largest contour to fish coordinates
+            self.fishcoords=np.array((xcoord,ycoord),dtype=float) #attributes coordinates of largest contour to fish coordinates
              
             for i in range(len(xcoord)):
                 if xcoord[i]==0:
@@ -198,11 +204,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 else:
                     cv2.circle(originalframe, (xcoord[i], ycoord[i]),6, (0, 0, 255),thickness=-1)
                     if i == len(xcoord)-1:
-                        self.textEdit.append("Detection on frame: %d" % count)
+                        self.track_TE.append("Detection on frame: %d" % count)
                 
 
             if self.novidCheckBox.isChecked()==False:
-                #time.sleep(0.00001)
                 cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
                 cv2.imshow("Background removed",currentframe)               
                 cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL) 
@@ -219,190 +224,74 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self.trackButton.setChecked(False)
                     self.trackButton.setText('Play')
-                    self.textEdit.setText('')
                     break
             count = count +1
             
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
         
-
-        
-        fishcoords=np.transpose(fishcoords)
-        fishcoords=pd.DataFrame(fishcoords)
-        fishcoords.to_csv("%s%s_raw.csv" %(path,cameraID))
-        
-        self.rawDataTable.setColumnCount(len(fishcoords.columns))
-        self.rawDataTable.setRowCount(len(fishcoords.index))
-        for i in range(len(fishcoords.index)):
-            for j in range(len(fishcoords.columns)):
-                self.rawDataTable.setItem(i,j,QTableWidgetItem(str(fishcoords.iget_value(i, j))))
-        
-        self.rawcoordinates=fishcoords.as_matrix()
-        self.signalemission=1
-        if self.outputCheckBox.isChecked()==True:
-            self.output(self.rawcoordinates, self.signalemission)
-        
-    
-#        """
-#        Erroneous data approaches:
-#        
-#        Spurious data mostly results from surface glare causing movement contours with roughly the same surface area (pixels)
-#        as the size of the fish. The first approach (1) against spuriuos data is to vary cntareathreshold (defined at top) to try and eliminate small erroneous contours.
-#        Usually this is a good approach, especially if the fish is large and you have low glare on the surface. Nevertheless, there are some erroneous
-#        contours that leak in. So I came up with approaches 2 and 3 to deal further with these. Approach (2) checks detected coordinates to see if they are
-#        alone (i.e. the rows above and below are zero), if they are alone then they get taken out. Defense (3) calculates a 2 period rolling standard deviation
-#        (rSTD) over the xCoord key. By default the rSTD threshold is 200, this helps remove groups of two or three spurious detections. The downside is that 
-#        the first row of good data in a block is lost becuase it will inevitably have a rSTD > 200. A small price to pay for good data. 
-#        """
-            
-        first=className.className()#create instance of className called 'first'
-        first.createName('bucky') #create a name using the createName method available in className
-        self.textEdit.append(first.name) #output first's name to the text console
-        
-    def output(self,x,y):
-        
-        fishcoords=pd.DataFrame(self.rawcoordinates)
-        
-        self.framerate=int(self.frameratelineEdit.text())
-        framerate=self.framerate
-        
-        if self.signalemission==1:
-            path, filename=os.path.split(os.path.abspath(self.video))
-            path='%s\\'%path
-            
-        if self.signalemission==2:
-            path=str(self.stitchdirectory)
-            path='%s\\'%path   
- 
-        crop=None
-        cropstart=None
-        cropend=None
-        
-        if self.cropCheckBox.isChecked()==True:
-            crop='yes'
-            cropstart=int(self.cropstartLineEdit.text())
-            cropend=int(self.cropendLineEdit.text())
-            
-        interpolate=None
-        
-        if self.interpolateCheckBox.isChecked()==True:
-            interpolate='yes'
-            
-        rollingperiods=int(self.maLineEdit.text())        
-        
-        try:
-            tag=int(path[-15:-3])                     #extract tag number from path
-            attempt=int(path[-2])
-            trial=int(path[-17])
-        except ValueError:
-            tag=None
-            attempt=None
-            trial=None
-
-        def georeferencex(xpixel):
-            return calibration[3]+(calibration[4]-xpixel)*calibration[2]
-        def georeferencey(ypixel):
-            return (calibration[5]-ypixel)*calibration[2]
- 
- 
-        if self.signalemission ==1:
-            cameraID=int(self.cameraIdLineEdit.text())
-            calibration=np.genfromtxt('./Calibration_Files/trial1_camera%d.cal'% cameraID)
-
-        if self.removelonersCheckBox.isChecked()==True:
-            npfishcoords=fishcoords.as_matrix()
-            for i in range(len(npfishcoords)):
-                try:
-                    if npfishcoords[i,0]==0 and npfishcoords[i+1,0]!=0 and npfishcoords[i+2,0]==0:
-                        npfishcoords[i+1,0]=0
-                        npfishcoords[i+1,1]=0
-                except IndexError:
-                    break
-            fishcoords=pd.DataFrame(npfishcoords)
-            
-        if self.signalemission == 1:    
-            fishcoords.columns = ['xpixel','ypixel']
-            fishcoords['xCoord']=fishcoords.apply(lambda row: georeferencex(row['xpixel']), axis=1)
-            fishcoords['yCoord']=fishcoords.apply(lambda row: georeferencey(row['ypixel']), axis=1)
-            fishcoords['Tag']=tag
-            fishcoords['Attempt']=attempt
-            fishcoords['Trial']=trial
-        else:
-            pass
-        
-        if self.rSTDCheckBox.isChecked()==True:
-            rSTDperiods=int(self.rstd_periods_LineEdit.text())
-            rSTD_threshold=int(self.rstd_threshold_LineEdit.text())
-            fishcoords['rSTD']=pd.rolling_std(fishcoords['xpixel'],rSTDperiods)
-            fishcoords.ix[fishcoords['rSTD']>rSTD_threshold,('xpixel','ypixel','xCoord','yCoord')]=None
-#            npfishcoords=fishcoords.as_matrix()
-#            for i in range(len(npfishcoords)):
-#                try:
-#                    if npfishcoords[i,0]==0 and npfishcoords[i+1,0]!=0 and npfishcoords[i+2,0]==0:
-#                        npfishcoords[i+1,0]=0
-#                        npfishcoords[i+1,1]=0
-#                except IndexError:
-#                    break
-#            fishcoords=pd.DataFrame(npfishcoords)
-
-        if self.signalemission ==1:
-            fishcoords.ix[fishcoords.xpixel==0,('xCoord','yCoord','xpixel','ypixel')]=None
-        
-        if self.signalemission==1:
-            fishcoords.to_csv("%s%s_raw.csv" %(path,cameraID))#used in stitch.py
-        if self.signalemission==2:
-            fishcoords.columns=['Attempt','Tag','Trial','xCoord','xpixel','yCoord','ypixel']
-            fishcoords.to_csv("%s%s_raw_stitched.csv" %(path,attempt))#used in stitch.py
-        self.df=kinematics(fishcoords,crop,cropstart,cropend,interpolate,framerate,rollingperiods,path,trial,tag,attempt).get_dataFrame()
-#            treatedfishcoords=treatedfishcoords.df
-        if self.signalemission==1:
-            self.df.to_csv("%s%d_%d_%d_%d_kin.csv" %(path,trial,tag,cameraID,attempt))
-        if self.signalemission==2:
-            self.df.to_csv("%s%d_%d_%d_stitched.csv" %(path,trial,tag,attempt))
-        
-        self.treatedDataTable.setColumnCount(len(self.df.columns))
-        self.treatedDataTable.setRowCount(len(self.df.index))
-        for i in range(len(self.df.index)):
-            for j in range(len(self.df.columns)):
-                self.treatedDataTable.setItem(i,j,QTableWidgetItem(str(self.df.iget_value(i, j))))
-        self.scene.clear()
-        self.scene.addPixmap(QPixmap('%sstitch.jpg'% path))
-        self.scene.update()
-        self.graphicsView.setScene(self.scene)
-        
-    def preview(self):
-        cap = cv2.VideoCapture(self.video)
-        
-        while(True):
-            (grabbed, frame) = cap.read()
-            
-            if not grabbed:
-                break                 
-            currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            height, width = currentframe.shape[:2]
-            
-            cv2.namedWindow("Preview", cv2.WINDOW_NORMAL) 
-            cv2.imshow("Preview",currentframe)  
-            self.textEdit.setText("Playing preview. Click video window and press 'q' or click 'Stop' button to cancel")
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break  
-        cap.release()
-        cv2.destroyAllWindows()
+        self.fishcoords=np.transpose(self.fishcoords)
+        self.fishcoords=pd.DataFrame(self.fishcoords)
+        self.fishcoords.to_csv("%s%s_raw.csv" %(self.path,self.cameraID))
         
     def open(self):
         fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
-        
         self.pathLabel.setText(fileobj)
         self.video=fileobj
+        self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
         
-    def opencalibration(self):
-        fileobj=QFileDialog.getOpenFileName(self) #'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
+    def openCSV(self):
+        fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
+        self.ppFileLoaded_L.setText(fileobj)
+        self.CSVfile=fileobj
         
-        self.pathLabel.setText(fileobj)
-        self.calibrationvideo=fileobj
+    def preview(self):
+        self.tracking.preview() 
+        
+
+
+    """
+    Calibration
+    """
+          
+    def initiateCalibrate(self):
+        self.cal=calibration.Calibration(refcal_TE=self.cal_TE,
+                                          refcalVideo_L=self.calVideo_L,
+                                          reftrialIndex_LE=self.trialIndex_LE,
+                                          refcameraID_LE=self.cameraID_LE,
+                                          refdistance2pnts_LE=self.distance2pnts_LE,
+                                          refrefDistance_LE=self.refDistance_LE)
+        self.cal.openCalibration()
+        
+    def doCalibration(self):
+        self.cal.doCalibration()
+        
+    def outputCalFile(self):
+        self.cal.outputCalFile()
+        
+    def textEditClear(self):
     
+            self.cal_TE.clear()
+            
+    """
+    post-processing
+    """
+        
+    def initiatepostProcessing(self):
+        pass
+
+    def pp_openCSV(self):
+        self.pp=postProcessing.postProcessing(self.pp_TV,self.ppFileLoaded_L)  
+        self.pp.openCSV()
+
+
+
+
+
+
+
+
+
     def openstitch(self):
         fileobj=QFileDialog.getExistingDirectory(self)
         
@@ -412,84 +301,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
         
-
-    def calibration(self):
-        
-        self.createCalibrationDir()
-        video=str(self.calibrationvideo)
-        camera = cv2.VideoCapture(video)
-        
-        success, firstFrame = camera.read() #reads the first image of the video for calibration function
-        
-        xdist=[]
-        ydist=[]
-        knownpoint=0
-        #mouse callback function, draws points and captures coordinates
-        def draw_circle(event,x,y,flags,param):
-#            global ix,iy,count,xdist,ydist
-        
-            if event == cv2.EVENT_LBUTTONDOWN:
-                cv2.circle(firstFrame,(x,y),2,(0,255,0),-1)
-                cv2.circle(firstFrame,(x,y),10,(255,0,0),1)
-                cv2.circle(firstFrame,(x,y),15,(255,0,0),1)
-                cv2.putText(firstFrame, label, (x+20, y+20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                self.count=self.count+1
-                
-                ix=x
-                iy=y
-                xdist.append(ix)
-                ydist.append(iy)
-        self.count = 0
-        cv2.namedWindow('firstframe')
-        cv2.setMouseCallback('firstframe',draw_circle)
-        
-        while self.count <= 3:#keeps window open as long as count is less than 3 so user can interact with setMouseCallback
-            cv2.imshow('firstframe',firstFrame)
-            if self.count==0:
-                cv2.putText(firstFrame, "1. Place first point (1)", (10, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                label="Point 1"
-                
-            if self.count==1:
-                cv2.putText(firstFrame, "2. Place second point (2)", (10, 40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                label="Point 2"
-                
-            if self.count==2:
-                cv2.putText(firstFrame, "3. Place point of known distance from flume entrance and bottom wall", (10, 60),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                label="Known point"
-                
-            if self.count==3:
-                cv2.putText(firstFrame, "Press 'q' to quit and enter parameters...", (10, 80),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                
-            k = cv2.waitKey(1) & 0xFF
-            if k == ord('q'):
-                cv2.destroyAllWindows()
-                break
-        
-        trial=self.calTrialIndexLineEdit.text()
-        cameraID=self.calCamIDLineEdit.text()
-        
-        seperation = self.calDist2pointsLineEdit.text()
-        distance = self.calreferenceLineEdit.text()
-        
-        deltax=float(seperation)/((xdist[0]-xdist[1])**2+(ydist[0]-ydist[1])**2)**0.5
-        pixperdist=0.1/deltax
-        print "O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist)
-        print "Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(distance)+(xdist[2]-xdist[0])*deltax,float(distance)+(xdist[2]-xdist[1])*deltax)
-        
-        f = open('./Calibration_files/trial%d_camera%d.cal' %(float(trial),float(cameraID)), 'w+') #opens file and allows it to be overwritten 
-        f.write(trial+'\n')
-        f.write(cameraID+'\n')
-        f.write(str(deltax)+'\n')
-        f.write(str(distance)+'\n')
-        f.write(str(xdist[2])+'\n')
-        f.write(str(ydist[2])+'\n')
-        f.close()
-        
-    def createCalibrationDir(self):
-        if not os.path.exists('./Calibration_files'):
-            os.makedirs('./Calibration_files')
-
-
     def stitch(self):
         self.signalemission=2
         path=str(self.stitchdirectory)
@@ -620,6 +431,9 @@ class kinematics:
         return self.df
     def get_figure(self):
         return self.fig
+
+
+
 
 app = QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)
