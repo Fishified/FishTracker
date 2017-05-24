@@ -35,6 +35,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         #initiate global lists
         self.cameralist=[]
+        self.pplist=[]
       
         
         #initiate signals
@@ -284,24 +285,21 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         pass
 
     def pp_openCSV(self):
+        
+        self.ppfileobj=QFileDialog.getOpenFileName(self, filter="Text Files (*.csv)")
+        self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj))
+        self.pplist.append(self.ppfilename)
+        print self.pplist
+        
+        for i in range(len(self.pplist)):
+            self.csvList_LW.addItem(self.pplist[i])
+            
+            
         self.pp=postProcessing.postProcessing(self.pp_TV,self.ppFileLoaded_L)  
+
         self.pp.openCSV()
-        
         self.plot_L.setPixmap(QPixmap("testplot.png"))
-        self.csvList_LW.addItem('test')
-        #item = QListWidgetItem()
-#        w = CustomItemWidget()
-#        w.setTitle = "Title"
-#        w.setDescription = "Blah blah"
-#        # would have a QPixmap already cached
-#        w.setBadgeImage = preCreatedPixmaps['thisBadge']  
-#        listWidget.insertItem(item)
-#        listWidget.setItemWidget(item, w)
-#        
-        
-
-
-        
+        self.csvList_LW.addItem(self.ppfilename)
 
 
 

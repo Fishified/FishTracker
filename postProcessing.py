@@ -38,8 +38,7 @@ class postProcessing:
         self.model = PandasModel(self.pdCSVfile)
         self.myrefpp_TV.setModel(self.model)
         
-    def scatterPlot(self):
-        ax = df.plot.scatter(x='a', y='b', color='DarkBlue', label='Group 1')
+
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
