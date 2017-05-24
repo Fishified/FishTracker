@@ -287,7 +287,20 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.pp=postProcessing.postProcessing(self.pp_TV,self.ppFileLoaded_L)  
         self.pp.openCSV()
         
-        self.label_3.setPixmap(QPixmap("testplot.png"))
+        self.plot_L.setPixmap(QPixmap("testplot.png"))
+        self.csvList_LW.addItem('test')
+        #item = QListWidgetItem()
+#        w = CustomItemWidget()
+#        w.setTitle = "Title"
+#        w.setDescription = "Blah blah"
+#        # would have a QPixmap already cached
+#        w.setBadgeImage = preCreatedPixmaps['thisBadge']  
+#        listWidget.insertItem(item)
+#        listWidget.setItemWidget(item, w)
+#        
+        
+
+
         
 
 
