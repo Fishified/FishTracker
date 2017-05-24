@@ -1087,18 +1087,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QGraphicsView" name="graphicsView_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>180</height>
-              </size>
+            <widget class="QLabel" name="plot_L">
+             <property name="text">
+              <string>TextLabel</string>
              </property>
             </widget>
            </item>

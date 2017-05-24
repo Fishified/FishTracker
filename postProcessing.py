@@ -8,6 +8,7 @@ Created on Tue May 23 14:42:49 2017
 from PyQt4.QtGui import QFileDialog
 from PyQt4 import QtCore
 import pandas as pd
+import matplotlib.pyplot as plt
 
 """
 Erroneous data removal approaches:
@@ -37,7 +38,8 @@ class postProcessing:
         self.model = PandasModel(self.pdCSVfile)
         self.myrefpp_TV.setModel(self.model)
         
-        
+    def scatterPlot(self):
+        ax = df.plot.scatter(x='a', y='b', color='DarkBlue', label='Group 1')
 
 class PandasModel(QtCore.QAbstractTableModel):
     """

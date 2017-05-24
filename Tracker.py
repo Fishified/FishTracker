@@ -1,7 +1,8 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
+
 from PyQt4.QtGui import QFileDialog
-from functools import partial 
 import sys
 import cv2
 import time
@@ -14,12 +15,12 @@ import os
 import postProcessing
 
 
-from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
-
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import (
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar)
+#from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
+#
+#from matplotlib.figure import Figure
+#from matplotlib.backends.backend_qt4agg import (
+#    FigureCanvasQTAgg as FigureCanvas,
+#    NavigationToolbar2QT as NavigationToolbar)
 
 
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
@@ -78,12 +79,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
     def play_movie(self):
         
-        
+    
         self.framerate=int(self.frameratelineEdit.text())
         self.cameraID=int(self.cameraIdLineEdit.text())
         
         self.path, filename=os.path.split(os.path.abspath(self.video))
         self.path='%s\\'%self.path
+        
 
         try:
             self.tag=int(self.path[-15:-3])                     #extract tag number from path
@@ -120,6 +122,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             originalframe=frame
             
             if not grabbed:
+                
                 self.trackButton.setChecked(False)
                 self.trackButton.setText('Play')
                 self.track_TE.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
@@ -283,12 +286,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def pp_openCSV(self):
         self.pp=postProcessing.postProcessing(self.pp_TV,self.ppFileLoaded_L)  
         self.pp.openCSV()
-
-
-
-
-
-
+        
+        self.label_3.setPixmap(QPixmap("testplot.png"))
+        
 
 
 
