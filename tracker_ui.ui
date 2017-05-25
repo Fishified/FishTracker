@@ -869,118 +869,6 @@
               <bool>true</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_10">
-              <item row="3" column="0">
-               <widget class="QGroupBox" name="groupBox_16">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="title">
-                 <string>False detection removal</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_18">
-                 <item row="0" column="0">
-                  <widget class="QCheckBox" name="removelonersCheckBox_2">
-                   <property name="text">
-                    <string>Remove lone values</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QCheckBox" name="rSTDCheckBox_2">
-                   <property name="text">
-                    <string>Perform rSTD removal</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_24">
-                   <property name="text">
-                    <string>rSTD periods</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="rstd_periods_LineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_25">
-                   <property name="text">
-                    <string>rSTD threshold</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="rstd_threshold_LineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QGroupBox" name="groupBox_3">
-                <property name="title">
-                 <string>GroupBox</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_3">
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="ppFileOpen_B">
-                   <property name="text">
-                    <string>Load files ...</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="ppFileLoaded_L">
-                   <property name="text">
-                    <string>No file specified</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>Working on this file:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QListWidget" name="csvList_LW"/>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_4">
-                   <property name="text">
-                    <string>Please select track to edit:</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="3" column="1">
                <widget class="QGroupBox" name="groupBox_15">
                 <property name="title">
@@ -1088,21 +976,133 @@
                 </layout>
                </widget>
               </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QGroupBox" name="groupBox_3">
+                <property name="title">
+                 <string>GroupBox</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_3">
+                 <item row="1" column="0">
+                  <widget class="QPushButton" name="ppFileOpen_B">
+                   <property name="text">
+                    <string>Load files ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="ppFileLoaded_L">
+                   <property name="text">
+                    <string>No file specified</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Working on this file:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QListWidget" name="csvList_LW"/>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Please select track to edit:</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QGroupBox" name="groupBox_16">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="title">
+                 <string>False detection removal</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_18">
+                 <item row="0" column="0">
+                  <widget class="QCheckBox" name="removelonersCheckBox_2">
+                   <property name="text">
+                    <string>Remove lone values</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="rSTDCheckBox_2">
+                   <property name="text">
+                    <string>Perform rSTD removal</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_24">
+                   <property name="text">
+                    <string>rSTD periods</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QLineEdit" name="rstd_periods_LineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_25">
+                   <property name="text">
+                    <string>rSTD threshold</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="rstd_threshold_LineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="ppExecute_B">
+                <property name="text">
+                 <string>Post-process</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QPushButton" name="ppInterpolate_B">
+                <property name="text">
+                 <string>Interpolate and crop</string>
+                </property>
+               </widget>
+              </item>
              </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="ppExecute_B">
-             <property name="text">
-              <string>Post-process</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="ppRefresh_B">
-             <property name="text">
-              <string>Refresh table</string>
-             </property>
             </widget>
            </item>
            <item>

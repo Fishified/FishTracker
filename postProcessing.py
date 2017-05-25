@@ -9,6 +9,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import QFileDialog
 from PyQt4 import QtCore
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 """
@@ -34,18 +35,18 @@ class postProcessing:
 
 
     def show(self):
-        print self.name
+#        print self.name
         self.ppFileLoaded_L.setText(self.name)
         
         self.pdCSVfile=pd.read_csv(self.ppfileobj)
         self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
+        self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
         self.model = PandasModel(self.pdCSVfile)
         self.pp_TV.setModel(self.model)
         
         ax=self.pdCSVfile.plot.scatter(x='x-coordinate (px)',y='y-coordinate (px)', color='DarkBlue')
         fig = ax.get_figure()
         fig.savefig('%s.png' % self.name)
-        
         self.plot_L.setPixmap(QPixmap("%s.png" % self.name))
         #self.csvList_LW.addItem(self.ppfilename)
 
