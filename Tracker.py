@@ -22,6 +22,20 @@ import postProcessing
 #    FigureCanvasQTAgg as FigureCanvas,
 #    NavigationToolbar2QT as NavigationToolbar)
 
+class Person(object):
+    def __init__(self, name, profession):
+        self.name = name
+        self.profession = profession
+        
+#class postProcessing:
+#    
+##    def __init__(self,refname,refpp_TV,ppFileLoaded_L):
+##        self.myrefname=refname
+##        self.myrefpp_TV=refpp_TV
+##        self.myppFileLoaded_L=ppFileLoaded_L
+#    def __init__(self,refname):
+#        self.refname=refname
+ 
 
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
@@ -35,7 +49,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         #initiate global lists
         self.cameralist=[]
-        self.pplist=[]
+        self.ppnamelist=[]
+        self.ppClasslist=[]
       
         
         #initiate signals
@@ -50,6 +65,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.loadcalibrate_B.clicked.connect(self.initiateCalibrate)
         self.makeCalFile_B.clicked.connect(self.outputCalFile)
         self.calClearTE_B.clicked.connect(self.textEditClear)
+        self.csvList_LW.currentItemChanged.connect(self.ppShow)
         
         self.calibrate_B.clicked.connect(self.doCalibration)
         self.stitchButton.clicked.connect(self.stitch)
@@ -286,22 +302,26 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
     def pp_openCSV(self):
         
-        self.ppfileobj=QFileDialog.getOpenFileName(self, filter="Text Files (*.csv)")
-        self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj))
-        self.pplist.append(self.ppfilename)
-        print self.pplist
+        self.ppfileobj=QFileDialog.getOpenFileNames(self, filter="Text Files (*.csv)")
         
-        for i in range(len(self.pplist)):
-            self.csvList_LW.addItem(self.pplist[i])
-            
-            
-        self.pp=postProcessing.postProcessing(self.pp_TV,self.ppFileLoaded_L)  
+        for i in range(len(self.ppfileobj)):
+           
+            self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj[i]))
+            slicestr=self.ppfilename[0:6]
+            self.ppnamelist.append(slicestr)
+            self.csvList_LW.addItem(self.ppnamelist[i])
+            self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.pppath,self.pp_TV,self.ppFileLoaded_L) for i in range(len(self.ppnamelist))]
+            print self.simplelist[i].name
+    
 
-        self.pp.openCSV()
-        self.plot_L.setPixmap(QPixmap("testplot.png"))
-        self.csvList_LW.addItem(self.ppfilename)
+#        self.pp.openCSV()
+#        self.plot_L.setPixmap(QPixmap("testplot.png"))
+#        self.csvList_LW.addItem(self.ppfilename)
 
-
+    def ppShow(self):
+        listindex = self.csvList_LW.currentRow()
+        
+        self.simplelist[listindex].show()
 
     def openstitch(self):
         fileobj=QFileDialog.getExistingDirectory(self)

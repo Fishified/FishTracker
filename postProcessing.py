@@ -24,19 +24,20 @@ the first row of good data in a block is lost becuase it will inevitably have a 
         
 class postProcessing:
     
-    def __init__(self,refpp_TV,ppFileLoaded_L):
-        self.myrefpp_TV=refpp_TV
-        self.myppFileLoaded_L=ppFileLoaded_L
-        
-    def openCSV(self):
-        
-        fileobj=QFileDialog.getOpenFileName()# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
-        self.myppFileLoaded_L.setText(fileobj)
-        self.CSVfile=fileobj
-        self.pdCSVfile=pd.read_csv(self.CSVfile)
-        self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
-        self.model = PandasModel(self.pdCSVfile)
-        self.myrefpp_TV.setModel(self.model)
+    def __init__(self,name,pppath,pp_TV,ppFileLoaded_L):
+        self.name=name
+        self.pppath=pppath
+        self.pp_TV=pp_TV
+        self.ppFileLoaded_L=ppFileLoaded_L
+
+
+    def show(self):
+        print self.name
+        self.ppFileLoaded_L.setText(self.name)
+#        self.pdCSVfile=pd.read_csv(self.path)
+#        self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
+#        self.model = PandasModel(self.pdCSVfile)
+#        self.myrefpp_TV.setModel(self.model)
         
 
 
