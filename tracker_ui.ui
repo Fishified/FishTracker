@@ -947,29 +947,36 @@
                  <string>GroupBox</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_3">
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="ppFileLoaded_L">
-                   <property name="text">
-                    <string>No file specified</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
+                 <item row="1" column="0">
                   <widget class="QPushButton" name="ppFileOpen_B">
                    <property name="text">
                     <string>Load files ...</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="ppFileLoaded_L">
+                   <property name="text">
+                    <string>No file specified</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
                   <widget class="QLabel" name="label_3">
                    <property name="text">
                     <string>Working on this file:</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
+                 <item row="1" column="1">
                   <widget class="QListWidget" name="csvList_LW"/>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Please select track to edit:</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>

@@ -4,7 +4,8 @@ Created on Tue May 23 14:42:49 2017
 
 @author: dugj2403
 """
-
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 from PyQt4.QtGui import QFileDialog
 from PyQt4 import QtCore
 import pandas as pd
@@ -24,9 +25,10 @@ the first row of good data in a block is lost becuase it will inevitably have a 
         
 class postProcessing:
     
-    def __init__(self,name,pppath,pp_TV,ppFileLoaded_L):
+    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L):
+        self.plot_L=plot_L
         self.name=name
-        self.pppath=pppath
+        self.ppfileobj=ppfileobj
         self.pp_TV=pp_TV
         self.ppFileLoaded_L=ppFileLoaded_L
 
@@ -34,12 +36,20 @@ class postProcessing:
     def show(self):
         print self.name
         self.ppFileLoaded_L.setText(self.name)
-#        self.pdCSVfile=pd.read_csv(self.path)
-#        self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
-#        self.model = PandasModel(self.pdCSVfile)
-#        self.myrefpp_TV.setModel(self.model)
         
+        self.pdCSVfile=pd.read_csv(self.ppfileobj)
+        self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
+        self.model = PandasModel(self.pdCSVfile)
+        self.pp_TV.setModel(self.model)
+        
+        ax=self.pdCSVfile.plot.scatter(x='x-coordinate (px)',y='y-coordinate (px)', color='DarkBlue')
+        fig = ax.get_figure()
+        fig.savefig('%s.png' % self.name)
+        
+        self.plot_L.setPixmap(QPixmap("%s.png" % self.name))
+        #self.csvList_LW.addItem(self.ppfilename)
 
+        
 
 class PandasModel(QtCore.QAbstractTableModel):
     """

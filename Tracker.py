@@ -310,18 +310,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             slicestr=self.ppfilename[0:6]
             self.ppnamelist.append(slicestr)
             self.csvList_LW.addItem(self.ppnamelist[i])
-            self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.pppath,self.pp_TV,self.ppFileLoaded_L) for i in range(len(self.ppnamelist))]
+            self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L) for i in range(len(self.ppnamelist))]
             print self.simplelist[i].name
     
 
-#        self.pp.openCSV()
-#        self.plot_L.setPixmap(QPixmap("testplot.png"))
-#        self.csvList_LW.addItem(self.ppfilename)
+
 
     def ppShow(self):
         listindex = self.csvList_LW.currentRow()
-        
         self.simplelist[listindex].show()
+        
+#        self.plot_L.setPixmap(QPixmap("testplot.png"))
+#        self.csvList_LW.addItem(self.ppfilename)
 
     def openstitch(self):
         fileobj=QFileDialog.getExistingDirectory(self)
