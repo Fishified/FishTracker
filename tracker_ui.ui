@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1032</width>
-    <height>696</height>
+    <height>735</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -872,104 +872,20 @@
               <item row="3" column="1">
                <widget class="QGroupBox" name="groupBox_15">
                 <property name="title">
-                 <string>Interpolation and cropping</string>
+                 <string>Data removal</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_17">
+                <layout class="QGridLayout" name="gridLayout_16">
                  <item row="0" column="0">
-                  <widget class="QCheckBox" name="interpolateCheckBox_2">
+                  <widget class="QPushButton" name="pp_blank_B">
                    <property name="text">
-                    <string>Interpolate missing values</string>
+                    <string>Blank rows</string>
                    </property>
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="QCheckBox" name="cropCheckBox_2">
+                  <widget class="QPushButton" name="ppUndo_B">
                    <property name="text">
-                    <string>Crop output</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_22">
-                   <property name="text">
-                    <string>Start Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="cropstartLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_23">
-                   <property name="text">
-                    <string>End Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="maLabel_2">
-                   <property name="text">
-                    <string>MA periods:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="cropendLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QLineEdit" name="maLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>Number of periods for the moving averages</string>
-                   </property>
-                   <property name="text">
-                    <string>10</string>
+                    <string>Undo blanking</string>
                    </property>
                   </widget>
                  </item>
@@ -1024,7 +940,7 @@
                 <property name="title">
                  <string>False detection removal</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_18">
+                <layout class="QGridLayout" name="gridLayout_15">
                  <item row="0" column="0">
                   <widget class="QCheckBox" name="removelonersCheckBox_2">
                    <property name="text">
@@ -1085,20 +1001,170 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="4" column="0" colspan="2">
+                  <widget class="QPushButton" name="ppExecute_B">
+                   <property name="text">
+                    <string>Post-process</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QPushButton" name="ppExecute_B">
-                <property name="text">
-                 <string>Post-process</string>
+              <item row="7" column="0">
+               <widget class="QGroupBox" name="groupBox_8">
+                <property name="title">
+                 <string>Pre-stitch</string>
                 </property>
+                <layout class="QGridLayout" name="gridLayout_14">
+                 <item row="0" column="0">
+                  <widget class="QPushButton" name="horizontalCombine_B">
+                   <property name="toolTip">
+                    <string>Places camera frames side by side to allow user to evaluate correct overlap</string>
+                   </property>
+                   <property name="text">
+                    <string>Combine horizontally</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QPushButton" name="ppInterpolate_B">
+              <item row="7" column="1">
+               <widget class="QGroupBox" name="groupBox_5">
+                <property name="title">
+                 <string>Stitch</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_9">
+                 <item row="5" column="1">
+                  <widget class="QLineEdit" name="maLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Number of periods for the moving averages</string>
+                   </property>
+                   <property name="text">
+                    <string>10</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QCheckBox" name="checkBox">
+                   <property name="text">
+                    <string>Enable stitching</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_22">
+                   <property name="text">
+                    <string>Start Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="cropstartLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QCheckBox" name="cropCheckBox_2">
+                   <property name="text">
+                    <string>Crop output</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLineEdit" name="cropendLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_23">
+                   <property name="text">
+                    <string>End Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="maLabel_2">
+                   <property name="text">
+                    <string>MA periods:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QPushButton" name="pushButton">
+                   <property name="toolTip">
+                    <string>Stitches paths from all cameras together</string>
+                   </property>
+                   <property name="text">
+                    <string>Stitch</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="interpolateCheckBox_2">
+                   <property name="text">
+                    <string>Interpolate missing values</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QPushButton" name="ppInterpolate_B">
+                   <property name="text">
+                    <string>Interpolate and crop</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="6" column="0" colspan="2">
+               <widget class="QPushButton" name="ppwrite_B">
                 <property name="text">
-                 <string>Interpolate and crop</string>
+                 <string>Write changes</string>
                 </property>
                </widget>
               </item>

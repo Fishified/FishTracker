@@ -13,6 +13,8 @@ import tracker_ui
 import calibration
 import os
 import postProcessing
+import glob
+import Stitch
 
 
 #from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
@@ -51,6 +53,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.cameralist=[]
         self.ppnamelist=[]
         self.ppClasslist=[]
+        self.calfile=[]
       
         
         #initiate signals
@@ -65,8 +68,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.loadcalibrate_B.clicked.connect(self.initiateCalibrate)
         self.makeCalFile_B.clicked.connect(self.outputCalFile)
         self.calClearTE_B.clicked.connect(self.textEditClear)
-        self.csvList_LW.currentItemChanged.connect(self.ppShow)
+        self.ppwrite_B.clicked.connect(self.ppWrite)
+        self.pp_blank_B.clicked.connect(self.ppBlank)
+        self.ppUndo_B.clicked.connect(self.ppUndo)
         
+        self.horizontalCombine_B.clicked.connect(self.pphorizontalCombine)
+        
+        self.csvList_LW.currentItemChanged.connect(self.ppShow)
         self.calibrate_B.clicked.connect(self.doCalibration)
         self.stitchButton.clicked.connect(self.stitch)
         self.stitchDirectoryButton.clicked.connect(self.openstitch)
@@ -303,25 +311,48 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def pp_openCSV(self):
         
         self.ppfileobj=QFileDialog.getOpenFileNames(self, filter="Text Files (*.csv)")
+       
         
         for i in range(len(self.ppfileobj)):
            
             self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj[i]))
             slicestr=self.ppfilename[0:6]
+            self.cameraid=self.ppfilename[0:2]
             self.ppnamelist.append(slicestr)
             self.csvList_LW.addItem(self.ppnamelist[i])
-            self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L) for i in range(len(self.ppnamelist))]
-            print self.simplelist[i].name
+
+            
+            for name in glob.glob("%s\Calibration_files\*" % self.pppath):
+                a="%s\Calibration_files\\%s.cal" % (self.pppath,self.cameraid)
+                if name == a:
+                    self.calfile.append(name)
+        
+        self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i]) for i in range(len(self.ppnamelist))]
+            
     
-
-
-
     def ppShow(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].show()
+        self.simplelist[listindex].show(self.simplelist[listindex].pdCSVfile)
         
-#        self.plot_L.setPixmap(QPixmap("testplot.png"))
-#        self.csvList_LW.addItem(self.ppfilename)
+        
+    def ppWrite(self):
+        
+        indexes = self.pp_TV.selectionModel().selectedRows()
+        for index in sorted(indexes):
+            print('Row %d is selected' % index.row())
+    
+    def ppBlank(self):
+        
+        listindex = self.csvList_LW.currentRow()
+        self.simplelist[listindex].blank(self.pp_TV.selectionModel().selectedRows())
+        
+
+    def ppUndo(self):
+        listindex = self.csvList_LW.currentRow()
+        self.simplelist[listindex].show(self.simplelist[listindex].pdCSVfile)
+    
+    def pphorizontalCombine(self):
+        self.simplelist
 
     def openstitch(self):
         fileobj=QFileDialog.getExistingDirectory(self)

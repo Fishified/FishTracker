@@ -26,30 +26,53 @@ the first row of good data in a block is lost becuase it will inevitably have a 
         
 class postProcessing:
     
-    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L):
+    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L,calfile):
         self.plot_L=plot_L
         self.name=name
         self.ppfileobj=ppfileobj
         self.pp_TV=pp_TV
         self.ppFileLoaded_L=ppFileLoaded_L
-
-
-    def show(self):
-#        print self.name
-        self.ppFileLoaded_L.setText(self.name)
         
+        #read calibration file
+        self.calfile=calfile
+        with open(self.calfile) as f:
+            self.calcontent = f.readlines()
+        
+        #load file and create dataframe 
         self.pdCSVfile=pd.read_csv(self.ppfileobj)
-        self.pdCSVfile.columns= ['Image frame', 'x-coordinate (px)','y-coordinate (px)']
-        self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
-        self.model = PandasModel(self.pdCSVfile)
-        self.pp_TV.setModel(self.model)
         
-        ax=self.pdCSVfile.plot.scatter(x='x-coordinate (px)',y='y-coordinate (px)', color='DarkBlue')
+        self.pdCSVfile.columns= ['Image frame', 'x_px','y_px']
+        self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
+        
+        #add georeferenced coordinates
+        self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
+        self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
+        
+        self.treated=self.pdCSVfile
+        
+
+    def show(self,refCSVinput):
+        
+        CSVinput=refCSVinput
+        self.ppFileLoaded_L.setText(self.name)        
+        self.pp_TV.setModel(PandasModel(CSVinput))
+        
+        
+        ax=CSVinput.plot.scatter(x='x',y='y', color='DarkBlue')
         fig = ax.get_figure()
         fig.savefig('%s.png' % self.name)
+        
         self.plot_L.setPixmap(QPixmap("%s.png" % self.name))
-        #self.csvList_LW.addItem(self.ppfilename)
+    
+    def blank(self,rowIndices):
+        self.rowIndices=rowIndices
+        print len(self.rowIndices)
+        
+        for i in range(len(self.rowIndices)):
+            self.treated.iloc['Image frame'==self.rowIndices[i]]=20
 
+        
+        self.show(self.treated)
         
 
 class PandasModel(QtCore.QAbstractTableModel):
