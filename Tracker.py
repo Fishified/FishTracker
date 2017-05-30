@@ -13,7 +13,7 @@ import tracker_ui
 import calibration
 import os
 import postProcessing
-import glob
+from glob import glob
 import Stitch
 
 
@@ -68,7 +68,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.loadcalibrate_B.clicked.connect(self.initiateCalibrate)
         self.makeCalFile_B.clicked.connect(self.outputCalFile)
         self.calClearTE_B.clicked.connect(self.textEditClear)
-        self.ppwrite_B.clicked.connect(self.ppWrite)
+        self.ppwrite_B.clicked.connect(self.cleanup)#attached to clean case routine
         self.pp_blank_B.clicked.connect(self.ppBlank)
         self.ppUndo_B.clicked.connect(self.ppUndo)
         
@@ -322,7 +322,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             self.csvList_LW.addItem(self.ppnamelist[i])
 
             
-            for name in glob.glob("%s\Calibration_files\*" % self.pppath):
+            for name in glob("%s\Calibration_files\*" % self.pppath):
                 a="%s\Calibration_files\\%s.cal" % (self.pppath,self.cameraid)
                 if name == a:
                     self.calfile.append(name)
@@ -346,11 +346,25 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         listindex = self.csvList_LW.currentRow()
         self.simplelist[listindex].blank(self.pp_TV.selectionModel().selectedRows())
         
-
     def ppUndo(self):
         listindex = self.csvList_LW.currentRow()
         self.simplelist[listindex].show(2)
-    
+         
+    #utilities
+    def cleanup(self):
+        self.pwd=os.getcwd()
+        print self.pwd        
+        for fl in glob("%s\\*_orig.csv" %self.pwd):
+            os.remove(fl)
+        for fl in glob("%s\\*_treated.csv" %self.pwd):
+            os.remove(fl)
+        
+        del self.simplelist[:]
+        self.ppnamelist=[]
+        self.csvList_LW.clear()
+        self.plot_L.setText("Trace will appear when a trajectory file is loaded")
+        self.pp_TV.clearSpans()
+        
     def pphorizontalCombine(self):
         self.simplelist
 

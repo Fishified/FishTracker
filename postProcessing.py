@@ -29,9 +29,11 @@ class postProcessing:
     def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L,calfile):
         self.plot_L=plot_L
         self.name=name
+        self.cameraid=self.name[0:2]
         self.ppfileobj=ppfileobj
         self.pp_TV=pp_TV
         self.ppFileLoaded_L=ppFileLoaded_L
+        self.loadedFlag=0
         
         #read calibration file
         self.calfile=calfile
@@ -40,25 +42,29 @@ class postProcessing:
         
         #load file and create dataframe 
         self.pdCSVfile=pd.read_csv(self.ppfileobj)
-        
         self.pdCSVfile.columns= ['Image frame', 'x_px','y_px']
         self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
         
         #add georeferenced coordinates
         self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
         self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
-        self.pdCSVfile.to_csv('original.csv',index_label=False,sep=',')
+        self.pdCSVfile.to_csv('%s_orig.csv' %self.cameraid,index_label=False,sep=',')
         self.treated=self.pdCSVfile
         
 
     def show(self,state):
         
-        if state == 0:
-            CSVinput = pd.read_csv("original.csv",sep =',')
+        #show for first time
+        if state == 0 and self.loadedFlag == 0:
+            CSVinput = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
+        #show after treating
+        if state == 0 and self.loadedFlag == 1:
+            CSVinput=self.treated
         if state==1:
             CSVinput=self.treated
+        #show after undoing changes
         if state == 2:
-            CSVinput = pd.read_csv("original.csv",sep =',')
+            CSVinput = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
             self.treated=CSVinput
         
         self.ppFileLoaded_L.setText(self.name)        
@@ -70,6 +76,7 @@ class postProcessing:
         fig.savefig('%s.png' % self.name)
         
         self.plot_L.setPixmap(QPixmap("%s.png" % self.name))
+        self.loadedFlag=1
     
     def blank(self,rowIndices):
         self.rowIndices=rowIndices
@@ -77,7 +84,7 @@ class postProcessing:
         for i in range(len(self.rowIndices)):
             self.treated.iloc[self.rowIndices[i].row(),1:5]=None
 
-        self.treated.to_csv('treated.csv',sep=',')
+        self.treated.to_csv("%s_treated.csv" % self.cameraid,sep =',')
         self.show(1)
         
 
