@@ -24,10 +24,30 @@ import Stitch
 #    FigureCanvasQTAgg as FigureCanvas,
 #    NavigationToolbar2QT as NavigationToolbar)
 
-class Person(object):
-    def __init__(self, name, profession):
-        self.name = name
-        self.profession = profession
+class PandasModel(QtCore.QAbstractTableModel):
+    """
+    Class to populate a table view with a pandas dataframe
+    """
+    def __init__(self, data, parent=None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return len(self._data.values)
+
+    def columnCount(self, parent=None):
+        return self._data.columns.size
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if index.isValid():
+            if role == QtCore.Qt.DisplayRole:
+                return str(self._data.values[index.row()][index.column()])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return self._data.columns[col]
+        return None
         
 #class postProcessing:
 #    
@@ -71,6 +91,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppwrite_B.clicked.connect(self.cleanup)#attached to clean case routine
         self.pp_blank_B.clicked.connect(self.ppBlank)
         self.ppUndo_B.clicked.connect(self.ppUndo)
+        self.ppstitch_B.clicked.connect(self.ppStitch)
         
         self.horizontalCombine_B.clicked.connect(self.pphorizontalCombine)
         
@@ -334,6 +355,36 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         listindex = self.csvList_LW.currentRow()
         self.simplelist[listindex].show(0)
         
+    def ppStitch(self):
+        self.stitchlist=[]
+        self.pwd=os.getcwd()
+        
+        for index in xrange(self.csvList_LW.count()):
+            filename="%s_treated.csv" % self.csvList_LW.item(index).text()[0:2]
+            self.stitchlist.append(pd.read_csv('%s\%s' % (self.pwd,filename)))
+
+        
+        csvcombined=self.stitchlist[0]#initiate list with first camera list
+        for i in range(len(self.stitchlist)):
+        	try:
+        		csvcombined=csvcombined.combine_first(self.stitchlist[i+1])
+        	except IndexError:
+        		break
+#        csvcombined.columns= ['Image frame', 'x_px','y_px','x','y']
+        csvcombined.to_csv("stitch.csv")   
+#        
+        
+        
+        self.ppFileLoaded_L.setText("stitch.csv")        
+#        self.pp_TV.setModel(PandasModel(csvcombined))
+#        
+        ax=csvcombined.plot.scatter(x='x',y='y', color='DarkBlue')
+        fig = ax.get_figure()
+        fig.savefig('stitch.png')
+        self.plot_L.setPixmap(QPixmap("stitch.png"))
+#        csvcombined=csvcombined[['Attempt','Tag','Trial','xCoord','xpixel','yCoord','ypixel']]
+        #---------save before kinematics-----------
+     
         
     def ppWrite(self):
         
@@ -362,7 +413,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         del self.simplelist[:]
         self.ppnamelist=[]
         self.csvList_LW.clear()
-        self.plot_L.setText("Trace will appear when a trajectory file is loaded")
+        self.plot_L.setText("Trace will appear when a trajectory file is selected ...")
         self.pp_TV.clearSpans()
         
     def pphorizontalCombine(self):

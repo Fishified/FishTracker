@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -853,8 +853,8 @@
        <attribute name="title">
         <string>Post-processing</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0" rowspan="2">
          <widget class="QGroupBox" name="groupBox_9">
           <property name="enabled">
            <bool>true</bool>
@@ -869,63 +869,64 @@
               <bool>true</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_10">
-              <item row="3" column="1">
-               <widget class="QGroupBox" name="groupBox_15">
+              <item row="4" column="0" colspan="2">
+               <widget class="QGroupBox" name="groupBox_8">
                 <property name="title">
-                 <string>Data removal</string>
+                 <string>Stitching</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_16">
+                <layout class="QGridLayout" name="gridLayout_17">
                  <item row="0" column="0">
-                  <widget class="QPushButton" name="pp_blank_B">
+                  <widget class="QCheckBox" name="stitchCheck_CB">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Check this if you are happy with the quality of all your files. Doing so will create a *_treated.csv file in the directory for each file in the list.</string>
+                   </property>
                    <property name="text">
-                    <string>Blank rows</string>
+                    <string>Enable stitching</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="ppUndo_B">
+                 <item row="0" column="1">
+                  <widget class="QPushButton" name="ppstitch_B">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Stitches paths from all cameras together</string>
+                   </property>
                    <property name="text">
-                    <string>Undo blanking</string>
+                    <string>Stitch</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QGroupBox" name="groupBox_3">
+              <item row="3" column="1">
+               <widget class="QGroupBox" name="groupBox_15">
                 <property name="title">
-                 <string>GroupBox</string>
+                 <string>Manual false detection removal</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_3">
+                <layout class="QGridLayout" name="gridLayout_16">
+                 <item row="0" column="0">
+                  <widget class="QPushButton" name="pp_blank_B">
+                   <property name="toolTip">
+                    <string>Removed erroneous data from selected rows in the table.</string>
+                   </property>
+                   <property name="text">
+                    <string>Blank selected rows</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="0">
-                  <widget class="QPushButton" name="ppFileOpen_B">
-                   <property name="text">
-                    <string>Load files ...</string>
+                  <widget class="QPushButton" name="ppUndo_B">
+                   <property name="toolTip">
+                    <string>Reverts active track back to its orginal state.</string>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="ppFileLoaded_L">
                    <property name="text">
-                    <string>No file specified</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>Working on this file:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QListWidget" name="csvList_LW"/>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_4">
-                   <property name="text">
-                    <string>Please select track to edit:</string>
+                    <string>Undo all blanking</string>
                    </property>
                   </widget>
                  </item>
@@ -938,7 +939,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="title">
-                 <string>False detection removal</string>
+                 <string>Automated false detection removal</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_15">
                  <item row="0" column="0">
@@ -1011,32 +1012,53 @@
                 </layout>
                </widget>
               </item>
-              <item row="7" column="0">
-               <widget class="QGroupBox" name="groupBox_8">
+              <item row="7" column="0" colspan="2">
+               <widget class="QGroupBox" name="groupBox_5">
                 <property name="title">
-                 <string>Pre-stitch</string>
+                 <string>Cropping and interpolation</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_14">
-                 <item row="0" column="0">
-                  <widget class="QPushButton" name="horizontalCombine_B">
-                   <property name="toolTip">
-                    <string>Places camera frames side by side to allow user to evaluate correct overlap</string>
-                   </property>
+                <layout class="QGridLayout" name="gridLayout_9">
+                 <item row="1" column="1">
+                  <widget class="QPushButton" name="ppInterpolate_B">
                    <property name="text">
-                    <string>Combine horizontally</string>
+                    <string>Interpolate and crop</string>
                    </property>
                   </widget>
                  </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QGroupBox" name="groupBox_5">
-                <property name="title">
-                 <string>Stitch</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_9">
+                 <item row="4" column="0">
+                  <widget class="QCheckBox" name="cropCheckBox_2">
+                   <property name="text">
+                    <string>Crop output</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="5" column="1">
+                  <widget class="QLineEdit" name="cropstartLineEdit_2">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="label_22">
+                   <property name="text">
+                    <string>Start Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1">
                   <widget class="QLineEdit" name="maLineEdit_2">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1058,47 +1080,17 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0">
-                  <widget class="QCheckBox" name="checkBox">
+                 <item row="7" column="0">
+                  <widget class="QLabel" name="maLabel_2">
                    <property name="text">
-                    <string>Enable stitching</string>
+                    <string>MA periods:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_22">
-                   <property name="text">
-                    <string>Start Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="cropstartLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QCheckBox" name="cropCheckBox_2">
-                   <property name="text">
-                    <string>Crop output</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
+                 <item row="6" column="1">
                   <widget class="QLineEdit" name="cropendLineEdit_2">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1117,34 +1109,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="label_23">
-                   <property name="text">
-                    <string>End Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="maLabel_2">
-                   <property name="text">
-                    <string>MA periods:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QPushButton" name="pushButton">
-                   <property name="toolTip">
-                    <string>Stitches paths from all cameras together</string>
-                   </property>
-                   <property name="text">
-                    <string>Stitch</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
+                 <item row="3" column="0">
                   <widget class="QCheckBox" name="interpolateCheckBox_2">
                    <property name="text">
                     <string>Interpolate missing values</string>
@@ -1152,39 +1117,106 @@
                   </widget>
                  </item>
                  <item row="6" column="0">
-                  <widget class="QPushButton" name="ppInterpolate_B">
+                  <widget class="QLabel" name="label_23">
                    <property name="text">
-                    <string>Interpolate and crop</string>
+                    <string>End Frame:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QPushButton" name="horizontalCombine_B">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="toolTip">
+                    <string>Places camera frames side by side to allow user to evaluate correct overlap</string>
+                   </property>
+                   <property name="text">
+                    <string>Combine horizontally</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </widget>
               </item>
-              <item row="6" column="0" colspan="2">
-               <widget class="QPushButton" name="ppwrite_B">
-                <property name="text">
-                 <string>Write changes</string>
+              <item row="0" column="0" colspan="2">
+               <widget class="QGroupBox" name="groupBox_3">
+                <property name="title">
+                 <string>Import and select</string>
                 </property>
+                <layout class="QGridLayout" name="gridLayout_3">
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Please select track to edit:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Active file:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="ppFileLoaded_L">
+                   <property name="text">
+                    <string>No file specified</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QListWidget" name="csvList_LW">
+                   <property name="toolTip">
+                    <string>Selected item in list is the active file for post-processing.</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QPushButton" name="ppFileOpen_B">
+                   <property name="toolTip">
+                    <string>Select all file for post-processing a single trajectory.</string>
+                   </property>
+                   <property name="text">
+                    <string>Load files ...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QPushButton" name="ppwrite_B">
+                   <property name="toolTip">
+                    <string>Erases all file create during post-processing from the active directory.</string>
+                   </property>
+                   <property name="text">
+                    <string>Empty list and revert folder</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
-           <item>
-            <widget class="QLabel" name="plot_L">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
          <widget class="QTableView" name="pp_TV"/>
         </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="plot_L">
+          <property name="text">
+           <string>Trace will appear when a trajectory file is selected ...</string>
+          </property>
+         </widget>
+        </item>
        </layout>
+       <zorder>groupBox_9</zorder>
+       <zorder>pp_TV</zorder>
+       <zorder>ppwrite_B</zorder>
+       <zorder>plot_L</zorder>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -1252,5 +1284,22 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>stitchCheck_CB</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>ppstitch_B</receiver>
+   <slot>setFocus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>466</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>326</x>
+     <y>466</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

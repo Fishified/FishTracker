@@ -49,6 +49,7 @@ class postProcessing:
         self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
         self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
         self.pdCSVfile.to_csv('%s_orig.csv' %self.cameraid,index_label=False,sep=',')
+        self.pdCSVfile.to_csv('%s_treated.csv' %self.cameraid,index_label=False,sep=',')
         self.treated=self.pdCSVfile
         
 
@@ -65,9 +66,10 @@ class postProcessing:
         #show after undoing changes
         if state == 2:
             CSVinput = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
+            CSVinput.to_csv('%s_treated.csv' %self.cameraid,index_label=False,sep=',')
             self.treated=CSVinput
         
-        self.ppFileLoaded_L.setText(self.name)        
+        self.ppFileLoaded_L.setText("%s.csv" % self.name)        
         self.pp_TV.setModel(PandasModel(CSVinput))
         
         
@@ -86,8 +88,9 @@ class postProcessing:
 
         self.treated.to_csv("%s_treated.csv" % self.cameraid,sep =',')
         self.show(1)
-        
+    
 
+        
 class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe
