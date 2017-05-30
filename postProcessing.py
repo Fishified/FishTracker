@@ -47,13 +47,20 @@ class postProcessing:
         #add georeferenced coordinates
         self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
         self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
-        
+        self.pdCSVfile.to_csv('original.csv',index_label=False,sep=',')
         self.treated=self.pdCSVfile
         
 
-    def show(self,refCSVinput):
+    def show(self,state):
         
-        CSVinput=refCSVinput
+        if state == 0:
+            CSVinput = pd.read_csv("original.csv",sep =',')
+        if state==1:
+            CSVinput=self.treated
+        if state == 2:
+            CSVinput = pd.read_csv("original.csv",sep =',')
+            self.treated=CSVinput
+        
         self.ppFileLoaded_L.setText(self.name)        
         self.pp_TV.setModel(PandasModel(CSVinput))
         
@@ -66,13 +73,12 @@ class postProcessing:
     
     def blank(self,rowIndices):
         self.rowIndices=rowIndices
-        print len(self.rowIndices)
-        
-        for i in range(len(self.rowIndices)):
-            self.treated.iloc['Image frame'==self.rowIndices[i]]=20
 
-        
-        self.show(self.treated)
+        for i in range(len(self.rowIndices)):
+            self.treated.iloc[self.rowIndices[i].row(),1:5]=None
+
+        self.treated.to_csv('treated.csv',sep=',')
+        self.show(1)
         
 
 class PandasModel(QtCore.QAbstractTableModel):

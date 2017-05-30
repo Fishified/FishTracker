@@ -332,7 +332,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
     def ppShow(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].show(self.simplelist[listindex].pdCSVfile)
+        self.simplelist[listindex].show(0)
         
         
     def ppWrite(self):
@@ -349,7 +349,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
     def ppUndo(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].show(self.simplelist[listindex].pdCSVfile)
+        self.simplelist[listindex].show(2)
     
     def pphorizontalCombine(self):
         self.simplelist
