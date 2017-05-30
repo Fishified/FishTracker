@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -869,41 +869,6 @@
               <bool>true</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_10">
-              <item row="4" column="0" colspan="2">
-               <widget class="QGroupBox" name="groupBox_8">
-                <property name="title">
-                 <string>Stitching</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_17">
-                 <item row="0" column="0">
-                  <widget class="QCheckBox" name="stitchCheck_CB">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Check this if you are happy with the quality of all your files. Doing so will create a *_treated.csv file in the directory for each file in the list.</string>
-                   </property>
-                   <property name="text">
-                    <string>Enable stitching</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QPushButton" name="ppstitch_B">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Stitches paths from all cameras together</string>
-                   </property>
-                   <property name="text">
-                    <string>Stitch</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
               <item row="3" column="1">
                <widget class="QGroupBox" name="groupBox_15">
                 <property name="title">
@@ -1005,134 +970,7 @@
                  <item row="4" column="0" colspan="2">
                   <widget class="QPushButton" name="ppExecute_B">
                    <property name="text">
-                    <string>Post-process</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="7" column="0" colspan="2">
-               <widget class="QGroupBox" name="groupBox_5">
-                <property name="title">
-                 <string>Cropping and interpolation</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_9">
-                 <item row="1" column="1">
-                  <widget class="QPushButton" name="ppInterpolate_B">
-                   <property name="text">
-                    <string>Interpolate and crop</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QCheckBox" name="cropCheckBox_2">
-                   <property name="text">
-                    <string>Crop output</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <widget class="QLineEdit" name="cropstartLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="label_22">
-                   <property name="text">
-                    <string>Start Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="1">
-                  <widget class="QLineEdit" name="maLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="toolTip">
-                    <string>Number of periods for the moving averages</string>
-                   </property>
-                   <property name="text">
-                    <string>10</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="0">
-                  <widget class="QLabel" name="maLabel_2">
-                   <property name="text">
-                    <string>MA periods:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="1">
-                  <widget class="QLineEdit" name="cropendLineEdit_2">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>30</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QCheckBox" name="interpolateCheckBox_2">
-                   <property name="text">
-                    <string>Interpolate missing values</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="6" column="0">
-                  <widget class="QLabel" name="label_23">
-                   <property name="text">
-                    <string>End Frame:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="horizontalCombine_B">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Places camera frames side by side to allow user to evaluate correct overlap</string>
-                   </property>
-                   <property name="text">
-                    <string>Combine horizontally</string>
+                    <string>Process</string>
                    </property>
                   </widget>
                  </item>
@@ -1189,11 +1027,245 @@
                     <string>Erases all file create during post-processing from the active directory.</string>
                    </property>
                    <property name="text">
-                    <string>Empty list and revert folder</string>
+                    <string>Empty list and revert folder to raw input</string>
                    </property>
                   </widget>
                  </item>
                 </layout>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QTabWidget" name="tabWidget_3">
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <property name="usesScrollButtons">
+                 <bool>false</bool>
+                </property>
+                <widget class="QWidget" name="tab_7">
+                 <attribute name="title">
+                  <string>Single-file Adjust</string>
+                 </attribute>
+                 <layout class="QGridLayout" name="gridLayout_19">
+                  <item row="0" column="0">
+                   <widget class="QGroupBox" name="groupBox_13">
+                    <property name="title">
+                     <string>Adjust for timing delay/advance</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_18">
+                     <item row="4" column="0" colspan="2">
+                      <widget class="QPushButton" name="ppAdjust_B">
+                       <property name="text">
+                        <string>Adjust</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QRadioButton" name="ppSubtract_RB">
+                       <property name="text">
+                        <string>Subtract rows</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QLineEdit" name="ppAdjust_LE">
+                       <property name="placeholderText">
+                        <string>15</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="label_7">
+                       <property name="text">
+                        <string>Enter # of rows:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QRadioButton" name="ppAdd_RB">
+                       <property name="text">
+                        <string>Add rows</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="0">
+                      <widget class="QPushButton" name="ppUndoAdjust_B">
+                       <property name="text">
+                        <string>Undo</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="tab_8">
+                 <attribute name="title">
+                  <string>Multi-file stitching</string>
+                 </attribute>
+                 <layout class="QGridLayout" name="gridLayout_20">
+                  <item row="0" column="0">
+                   <widget class="QGroupBox" name="groupBox_8">
+                    <property name="title">
+                     <string>Stitching</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_17">
+                     <item row="1" column="1">
+                      <widget class="QPushButton" name="ppstitch_B">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>Stitches paths from all cameras together</string>
+                       </property>
+                       <property name="text">
+                        <string>Stitch</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QPushButton" name="horizontalCombine_B">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>Places camera frames side by side to allow user to evaluate correct overlap</string>
+                       </property>
+                       <property name="text">
+                        <string>Combine horizontally</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="tab_9">
+                 <attribute name="title">
+                  <string>Cropping and interpolation</string>
+                 </attribute>
+                 <layout class="QGridLayout" name="gridLayout_21">
+                  <item row="0" column="0">
+                   <widget class="QGroupBox" name="groupBox_5">
+                    <property name="title">
+                     <string>Cropping and interpolation</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_9">
+                     <item row="1" column="1">
+                      <widget class="QPushButton" name="ppInterpolate_B">
+                       <property name="text">
+                        <string>Interpolate and crop</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="0">
+                      <widget class="QCheckBox" name="cropCheckBox_2">
+                       <property name="text">
+                        <string>Crop output</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QLineEdit" name="cropstartLineEdit_2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="0">
+                      <widget class="QLabel" name="label_22">
+                       <property name="text">
+                        <string>Start Frame:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QLineEdit" name="maLineEdit_2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="toolTip">
+                        <string>Number of periods for the moving averages</string>
+                       </property>
+                       <property name="text">
+                        <string>10</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="0">
+                      <widget class="QLabel" name="maLabel_2">
+                       <property name="text">
+                        <string>MA periods:</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QLineEdit" name="cropendLineEdit_2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0">
+                      <widget class="QLabel" name="label_23">
+                       <property name="text">
+                        <string>End Frame:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QCheckBox" name="interpolateCheckBox_2">
+                       <property name="text">
+                        <string>Interpolate missing values</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
               </item>
              </layout>
@@ -1210,47 +1282,6 @@
           <property name="text">
            <string>Trace will appear when a trajectory file is selected ...</string>
           </property>
-         </widget>
-        </item>
-       </layout>
-       <zorder>groupBox_9</zorder>
-       <zorder>pp_TV</zorder>
-       <zorder>ppwrite_B</zorder>
-       <zorder>plot_L</zorder>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Tables</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <widget class="QTabWidget" name="tabWidget_2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="tab_3">
-           <attribute name="title">
-            <string>Raw Pixel Coordinates</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <widget class="QTableWidget" name="rawDataTable"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tab_4">
-           <attribute name="title">
-            <string>Post-processed Data</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
-            <item>
-             <widget class="QTableWidget" name="treatedDataTable"/>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
        </layout>
@@ -1284,22 +1315,5 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>stitchCheck_CB</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>ppstitch_B</receiver>
-   <slot>setFocus()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>152</x>
-     <y>466</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>326</x>
-     <y>466</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

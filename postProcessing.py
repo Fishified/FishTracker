@@ -12,17 +12,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-"""
-Erroneous data removal approaches:
-
-Spurious data mostly results from surface glare causing movement contours with roughly the same surface area (pixels)
-as the size of the fish. The first approach (1) against spuriuos data is to vary cntareathreshold (defined at top) to try and eliminate small erroneous contours.
-Usually this is a good approach, especially if the fish is large and you have low glare on the surface. Nevertheless, there are some erroneous
-contours that leak in. So I came up with approaches 2 and 3 to deal further with these. Approach (2) checks detected coordinates to see if they are
-alone (i.e. the rows above and below are zero), if they are alone then they get taken out. Defense (3) calculates a 2 period rolling standard deviation
-(rSTD) over the xCoord key. By default the rSTD threshold is 200, this helps remove groups of two or three spurious detections. The downside is that 
-the first row of good data in a block is lost becuase it will inevitably have a rSTD > 200. A small price to pay for good data. 
-"""
         
 class postProcessing:
     
@@ -73,7 +62,7 @@ class postProcessing:
         self.pp_TV.setModel(PandasModel(CSVinput))
         
         
-        ax=CSVinput.plot.scatter(x='x',y='y', color='DarkBlue')
+        ax=CSVinput.plot.scatter(x='x',y='y', color='DarkBlue',figsize=(20, 4))
         fig = ax.get_figure()
         fig.savefig('%s.png' % self.name)
         
@@ -88,7 +77,26 @@ class postProcessing:
 
         self.treated.to_csv("%s_treated.csv" % self.cameraid,sep =',')
         self.show(1)
-    
+        
+    def ppAdjust(self,adjust,state):
+        self.state=state
+        self.adjust=int(adjust)
+
+        if state == 1:
+            df = pd.DataFrame(index=range(0,self.adjust),columns=['Image frame','x_px','y_px','x','y'], dtype='float')
+            
+            self.treated= pd.concat([df,self.treated])
+            self.treated=self.treated.reset_index(drop=True)
+            self.treated['Image frame'] = self.treated.index
+
+        if state == 0:
+            
+            self.treated = self.treated.ix[self.adjust:]
+            self.treated=self.treated.reset_index(drop=True)
+            self.treated['Image frame'] = self.treated.index
+            
+        self.treated.to_csv("%s_treated.csv" % self.cameraid,sep =',')
+        self.show(1)
 
         
 class PandasModel(QtCore.QAbstractTableModel):
