@@ -1,28 +1,22 @@
+
+#imports
+import sys
+import os
+import time
+from glob import glob
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-
 from PyQt4 import QtCore
 from PyQt4.QtGui import QFileDialog
-import sys
+
 import cv2
-import time
-import videoTracking
 import numpy as np
 import pandas as pd
+
 import tracker_ui
 import calibration
-import os
 import postProcessing
-from glob import glob
-import Stitch
-
-
-#from pandas.sandbox.qtpandas import DataFrameModel, DataFrameWidget
-#
-#from matplotlib.figure import Figure
-#from matplotlib.backends.backend_qt4agg import (
-#    FigureCanvasQTAgg as FigureCanvas,
-#    NavigationToolbar2QT as NavigationToolbar)
+import videoTracking
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
@@ -49,19 +43,9 @@ class PandasModel(QtCore.QAbstractTableModel):
             return self._data.columns[col]
         return None
         
-#class postProcessing:
-#    
-##    def __init__(self,refname,refpp_TV,ppFileLoaded_L):
-##        self.myrefname=refname
-##        self.myrefpp_TV=refpp_TV
-##        self.myppFileLoaded_L=ppFileLoaded_L
-#    def __init__(self,refname):
-#        self.refname=refname
- 
 
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
-    #initiation function on start-up
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -69,54 +53,48 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.scene=QGraphicsScene()
         self.scene2=QGraphicsScene()
         
-        self.ppAdjustState=1        
+        #intial values
+        self.ppAdjustState=1
+        self.framerate=int(self.trkFramerate_LE.text())
         
-        #initiate global lists
+        #lists
         self.cameralist=[]
         self.ppnamelist=[]
         self.ppClasslist=[]
         self.calfile=[]
-          
-        #buttons
-        self.trackButton.clicked.connect(self.play_movie)
-        self.loadButton.clicked.connect(self.open)
-        self.previewButton.clicked.connect(self.preview)
-        self.contourButton.clicked.connect(self.contour)
-        self.ppFileOpen_B.clicked.connect(self.pp_openCSV)
-        self.ppExecute_B.clicked.connect(self.initiatepostProcessing)
-        self.loadcalibrate_B.clicked.connect(self.initiateCalibrate)
-        self.makeCalFile_B.clicked.connect(self.outputCalFile)
+        self.simplelist=[]
+        
+        #calibrate
+        self.calLoadCalibrate_B.clicked.connect(self.initiateCalibrate)
+        self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
         self.calClearTE_B.clicked.connect(self.textEditClear)
-        self.ppwrite_B.clicked.connect(self.cleanup)#attached to clean case routine
-        self.pp_blank_B.clicked.connect(self.ppBlank)
-        self.ppUndo_B.clicked.connect(self.ppUndo)
-        self.ppstitch_B.clicked.connect(self.ppStitch)
-        self.ppAdjust_B.clicked.connect(self.ppAdjust)
+        self.calCalibrate_B.clicked.connect(self.doCalibration)
         
-        #radio buttons
-        
-        self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
-        self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
-        
-        self.horizontalCombine_B.clicked.connect(self.pphorizontalCombine)
-        
-        self.csvList_LW.currentItemChanged.connect(self.ppShow)
-        self.calibrate_B.clicked.connect(self.doCalibration)
-        self.stitchDirectoryButton.clicked.connect(self.openstitch)
-        
-        #sliders
+        #track
+        self.trkTrack_B.clicked.connect(self.play_movie)
+        self.trkLoad_B.clicked.connect(self.open)
+        self.trkPreview_B.clicked.connect(self.preview)
+        self.trkContour_B.clicked.connect(self.contour)
+        self.trkFramerate_LE.editingFinished.connect(self.framerateChange)
+
         self.gaussSlider.valueChanged.connect(self.gaussSliderChange)
         self.medianSlider.valueChanged.connect(self.medianSliderChange)
         self.kernelSlider.valueChanged.connect(self.kernelSliderChange)
         
-        
-        self.populatecameraslineEdit.returnPressed.connect(self.populatecameralist)
-        
-        try:
-            self.reloadButton.clicked.connect(lambda: self.output(self.rawcoordinates, self.signalemission))
-        except AttributeError:
-            pass
+        #post-process
+        self.ppFileOpen_B.clicked.connect(self.pp_openCSV)
+        self.ppClean_B.clicked.connect(self.cleanup)#attached to clean case routine
+        self.ppBlank_B.clicked.connect(self.ppBlank)
+        self.ppUndo_B.clicked.connect(self.ppUndo)
+        self.ppStitch_B.clicked.connect(self.ppStitch)
+        self.ppAdjust_B.clicked.connect(self.ppAdjust)
+        self.ppHorizontalCombine_B.clicked.connect(self.pphorizontalCombine)
+        self.ppInterpolate_B.clicked.connect(self.ppInterpolate)
 
+        self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
+        self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
+    
+        self.csvList_LW.currentItemChanged.connect(self.ppShow)
 
     def populatecameralist(self):
         self.cameralist.append(self.populatecameraslineEdit.text())
@@ -127,12 +105,15 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.medianValueLabel.setText(str(self.medianSlider.value()))
     def kernelSliderChange(self):
         self.kernelValueLabel.setText(str(self.kernelSlider.value()))
+    def framerateChange(self):
+        self.framerate=int(self.trkFramerate_LE.text())
 
     def play_movie(self):
         
-    
-        self.framerate=int(self.frameratelineEdit.text())
+
+        self.framerate=int(self.trkFramerate_LE.text())
         self.cameraID=int(self.cameraIdLineEdit.text())
+        print self.framerate
         
         self.path, filename=os.path.split(os.path.abspath(self.video))
         self.path='%s\\'%self.path
@@ -162,23 +143,22 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             
             if count==0:
                 self.track_TE.setText("Tracking. Click video window and press 'q' or click 'Stop' button to cancel")
-            if self.trackButton.isChecked()== False:
+            if self.trkTrack_B.isChecked()== False:
                 self.scene.clear()
-                self.trackButton.setText('Play')
+                self.trkTrack_B.setText('Play')
                 break
             else:
-                self.trackButton.setText('Stop')
+                self.trkTrack_B.setText('Stop')
                 
             (grabbed, frame) = self.cap.read()
             originalframe=frame
-            
+
             if not grabbed:
                 
-                self.trackButton.setChecked(False)
-                self.trackButton.setText('Play')
+                self.trkTrack_B.setChecked(False)
+                self.trkTrack_B.setText('Play')
                 self.track_TE.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
                 break           
-            
             currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
             #fills in timestamp digits to prevent detection
@@ -302,12 +282,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def preview(self):
         self.tracking.preview() 
         
-
-
     """
     Calibration
     """
-          
     def initiateCalibrate(self):
         self.cal=calibration.Calibration(refcal_TE=self.cal_TE,
                                           refcalVideo_L=self.calVideo_L,
@@ -330,16 +307,15 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     """
     post-processing
     """
-        
-    def initiatepostProcessing(self):
-        pass
 
     def pp_openCSV(self):
+        self.ppnamelist=[]
+        self.ppfileobj=[]
+        self.calfile=[]
         
         self.ppfileobj=QFileDialog.getOpenFileNames(self, filter="Text Files (*.csv)")
        
         for i in range(len(self.ppfileobj)):
-           
             self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj[i]))
             slicestr=self.ppfilename[0:6]
             self.cameraid=self.ppfilename[0:2]
@@ -352,13 +328,28 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 if name == a:
                     self.calfile.append(name)
         
-        self.simplelist = [postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i]) for i in range(len(self.ppnamelist))]
-             
+        self.newlist=[postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i],0,self.framerate) for i in range(len(self.ppnamelist))]
+       
+        if len(self.simplelist) == 0:
+            self.simplelist=self.newlist
+        else:
+            self.simplelist=self.simplelist+self.newlist
+            
     def ppShow(self):
         listindex = self.csvList_LW.currentRow()
         self.simplelist[listindex].show(0)
         
     def ppStitch(self):
+        
+        for i in range(len(self.simplelist)):
+            if self.simplelist[i].name=="Stitch":
+                del self.simplelist[i]
+                
+        self.csvList_LW.clear()
+        for i in range(len(self.simplelist)):
+            self.csvList_LW.addItem(self.simplelist[i].name)
+                
+                
         self.ppPopulateStitchList()
         csvcombined=self.stitchlist[0]#initiate list with first camera list
         for i in range(len(self.stitchlist)):
@@ -367,29 +358,29 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         	except IndexError:
         		break
 
-        csvcombined.to_csv("stitch.csv")    
-        self.pp_TV.setModel(PandasModel(csvcombined))
+        csvcombined.to_csv("stitch.csv",index_label=False,sep=',')    
         
-        self.ppFileLoaded_L.setText("stitch.csv")        
-        ax=csvcombined.plot.scatter(x='x',y='y', color='DarkBlue',figsize=(20, 4))
-        fig = ax.get_figure()
-        fig.savefig('stitch.png')
-        self.plot_L.setPixmap(QPixmap("stitch.png"))
+        stitchPPinstance= postProcessing.postProcessing("Stitch","stitch.csv",self.pp_TV,self.ppFileLoaded_L,self.plot_L,'./Calibration_files/stitch.cal',1,self.framerate)
+        
+        self.simplelist.append(stitchPPinstance)
+        self.csvList_LW.addItem( self.simplelist[-1].name)
+    
+        self.simplelist[-1].show(3)
 
     def ppPopulateStitchList(self):
         self.stitchlist=[]
         self.pwd=os.getcwd()
         
         for index in xrange(self.csvList_LW.count()):
+            if self.csvList_LW.item(index).text()=="Stitch":
+                continue
             filename="%s_treated.csv" % self.csvList_LW.item(index).text()[0:2]
             self.stitchlist.append(pd.read_csv('%s\%s' % (self.pwd,filename)))
-     
-    def ppWrite(self):
-        
-        indexes = self.pp_TV.selectionModel().selectedRows()
-        for index in sorted(indexes):
-            print('Row %d is selected' % index.row())
-    
+            
+        f = open('./Calibration_files/stitch.cal', 'w+') #opens file and allows it to be overwritten 
+        f.write("Dummy calibration file for stitch")
+        f.close()
+
     def ppBlank(self):
         
         listindex = self.csvList_LW.currentRow()
@@ -416,98 +407,32 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
     def ppAdjust(self):
         listindex = self.csvList_LW.currentRow()
-        print self.ppAdjust_LE.text()
         self.simplelist[listindex].ppAdjust(self.ppAdjust_LE.text(),self.ppAdjustState)
         
-         
+    def ppInterpolate(self):
+        listindex = self.csvList_LW.currentRow()
+        self.simplelist[listindex].ppInterpolate()
+        
     #utilities
     def cleanup(self):
         self.pwd=os.getcwd()
-        print self.pwd        
         for fl in glob("%s\\*_orig.csv" %self.pwd):
             os.remove(fl)
         for fl in glob("%s\\*_treated.csv" %self.pwd):
+            os.remove(fl)
+        for fl in glob("%s\\Stitch.csv" %self.pwd):
             os.remove(fl)
         
         del self.simplelist[:]
         self.ppnamelist=[]
         self.csvList_LW.clear()
+        self.ppFileLoaded_L.clear()
         self.plot_L.setText("Trace will appear when a trajectory file is selected ...")
         self.pp_TV.clearSpans()
         
-    def openstitch(self):
-        fileobj=QFileDialog.getExistingDirectory(self)
-        
-        self.pathLabel.setText(fileobj)
-        self.stitchdirectory=fileobj
-
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
                
-class kinematics:
-    
-    def __init__(self,df,crop,cropstart,cropend,interpolate,framerate,rollingperiods,path,trial,tag,attempt):
-        
-        if crop=='yes':
-            df=df[(df.index.values>cropstart)&(df.index.values<cropend)]
-        #mark interpolated rows
-        def findinterpolatedvalues(state,xCoord):
-            if state==1:
-                return xCoord
-        df['Interpolated']=0
-        df.ix[df['xCoord'].isnull(),'Interpolated']=1
-        
-    
-        #---------Calculate velocities--------------
-        if interpolate=='yes':
-            df=df.interpolate() #interpolate values to use .diff()
-    
-        df['xVel']=df.xCoord.diff()*framerate
-        df['yVel']=df.yCoord.diff()*framerate
-        df.to_csv("C:/Users/Jason/Desktop/testing.csv")
-        #	df.ix[(df.xVel>10)|(df.xVel<-10)]=None #knock out unrealistically high velocities due to stitching errors
-        #
-        #	if interpolate=='yes':
-        #		df=df.interpolate() #interpolate to fill knocked out values
-        
-        df['Interpolated']=df.apply(lambda row: findinterpolatedvalues(row['Interpolated'],row['xCoord']), axis=1)
-        #df=df.reset_index()
-        #---------Include "up" and "down" rows------
-        df['up']=df['xCoord']
-        df['down']=df['xCoord']
-    
-        df.ix[(df['xVel']<0),'up']=None
-        df.ix[(df['xVel']>=0),'down']=None
-        df.ix[df['xVel'].isnull(),'down']=None
-        df.ix[df['xVel'].isnull(),'up']=None
-        #---------Get out moving averaged velocities-----
-        df['MAxVel']=pd.rolling_mean(df['xVel'],rollingperiods)
-        df['MAyVel']=pd.rolling_mean(df['yVel'],rollingperiods)
-        df['xAcc']=df.MAxVel.diff()*framerate
-        df['yAcc']=df.MAyVel.diff()*framerate
-    
-        df['MAxCoord']=pd.rolling_mean(df['xCoord'],3)
-        df['MAyCoord']=pd.rolling_mean(df['yCoord'],3)
-    
-        #print compiled image
-        df.to_csv("%s10_check.csv" %(path))
-        ax=df.plot(x='up',y='yCoord',kind='scatter',xlim=[0,10],ylim=[0,0.635],color='Red',figsize=(10,2))
-        df.plot(kind='scatter', x='down', y='yCoord',ax=ax,color='Blue')
-        df.plot(kind='scatter', x='Interpolated', y='yCoord',ax=ax,color='yellow')
-        #df.plot(kind='scatter', x='MAxCoord', y='yCoord',ax=ax,color='white',label='Moving Average')  
-        fig = ax.get_figure()
-        
-        fig.savefig('%sstitch.jpg'% path)
-        interpolatedrows=df[df.Interpolated>=0]['xCoord']
-        self.df=df
-        self.fig=fig
-
-    def get_dataFrame(self):
-        return self.df
-    def get_figure(self):
-        return self.fig
-
-
 
 
 app = QApplication(sys.argv)

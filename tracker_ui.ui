@@ -72,7 +72,7 @@
             </spacer>
            </item>
            <item row="0" column="1">
-            <widget class="QPushButton" name="calibrate_B">
+            <widget class="QPushButton" name="calCalibrate_B">
              <property name="text">
               <string>Calibrate</string>
              </property>
@@ -85,7 +85,7 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
-               <widget class="QPushButton" name="loadcalibrate_B">
+               <widget class="QPushButton" name="calLoadCalibrate_B">
                 <property name="text">
                  <string>Load video for calibration</string>
                 </property>
@@ -224,7 +224,7 @@
                </widget>
               </item>
               <item row="4" column="1">
-               <widget class="QPushButton" name="makeCalFile_B">
+               <widget class="QPushButton" name="calMakeCalFile_B">
                 <property name="text">
                  <string>Make calibration files</string>
                 </property>
@@ -235,6 +235,9 @@
            </item>
            <item row="2" column="0">
             <widget class="QGroupBox" name="groupBox_11">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="title">
               <string>Output</string>
              </property>
@@ -360,14 +363,14 @@
                    </property>
                    <layout class="QGridLayout" name="gridLayout_8">
                     <item row="0" column="0">
-                     <widget class="QPushButton" name="loadButton">
+                     <widget class="QPushButton" name="trkLoad_B">
                       <property name="text">
                        <string>Load Video</string>
                       </property>
                      </widget>
                     </item>
                     <item row="1" column="0">
-                     <widget class="QPushButton" name="previewButton">
+                     <widget class="QPushButton" name="trkPreview_B">
                       <property name="text">
                        <string>Fast Preview</string>
                       </property>
@@ -406,7 +409,7 @@
                      </widget>
                     </item>
                     <item row="3" column="1">
-                     <widget class="QLineEdit" name="frameratelineEdit">
+                     <widget class="QLineEdit" name="trkFramerate_LE">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -534,7 +537,7 @@
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QPushButton" name="trackButton">
+                  <widget class="QPushButton" name="trkTrack_B">
                    <property name="toolTip">
                     <string>Starts object tracking on currently loaded video.</string>
                    </property>
@@ -768,7 +771,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1" colspan="2">
-                 <widget class="QPushButton" name="contourButton">
+                 <widget class="QPushButton" name="trkContour_B">
                   <property name="text">
                    <string>Reset contour area limit</string>
                   </property>
@@ -793,53 +796,7 @@
                <zorder>label</zorder>
                <zorder>label_5</zorder>
                <zorder>contourLineEdit</zorder>
-               <zorder>contourButton</zorder>
-              </widget>
-             </item>
-             <item row="4" column="0" colspan="2">
-              <widget class="QGroupBox" name="groupBox_12">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="title">
-                <string>Stitch</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_9">
-                <item>
-                 <widget class="QCheckBox" name="enablestitchCheckBox">
-                  <property name="toolTip">
-                   <string>Allows user to stitch together kinematics data from multiple cameras. Tip - perform error removal on each individual camera beforehand.</string>
-                  </property>
-                  <property name="text">
-                   <string>Enable multi-camera stitching</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="stitchDirectoryButton">
-                  <property name="text">
-                   <string>Select directory</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_20">
-                  <property name="text">
-                   <string>Enter Camera IDs:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="populatecameraslineEdit"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="stitchButton">
-                  <property name="text">
-                   <string>Stitch</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <zorder>trkContour_B</zorder>
               </widget>
              </item>
             </layout>
@@ -876,7 +833,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_16">
                  <item row="0" column="0">
-                  <widget class="QPushButton" name="pp_blank_B">
+                  <widget class="QPushButton" name="ppBlank_B">
                    <property name="toolTip">
                     <string>Removed erroneous data from selected rows in the table.</string>
                    </property>
@@ -891,7 +848,7 @@
                     <string>Reverts active track back to its orginal state.</string>
                    </property>
                    <property name="text">
-                    <string>Undo all blanking</string>
+                    <string>Undo changes to active file</string>
                    </property>
                   </widget>
                  </item>
@@ -901,7 +858,7 @@
               <item row="3" column="0">
                <widget class="QGroupBox" name="groupBox_16">
                 <property name="enabled">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="title">
                  <string>Automated false detection removal</string>
@@ -1007,7 +964,7 @@
                  <item row="1" column="1">
                   <widget class="QListWidget" name="csvList_LW">
                    <property name="toolTip">
-                    <string>Selected item in list is the active file for post-processing.</string>
+                    <string>Selected item in list is the active file for post-processing. Make sure cameras appear in list in ascending order (i.e. first, second, third camera going upstream).</string>
                    </property>
                   </widget>
                  </item>
@@ -1022,7 +979,7 @@
                   </widget>
                  </item>
                  <item row="3" column="1">
-                  <widget class="QPushButton" name="ppwrite_B">
+                  <widget class="QPushButton" name="ppClean_B">
                    <property name="toolTip">
                     <string>Erases all file create during post-processing from the active directory.</string>
                    </property>
@@ -1069,8 +1026,11 @@
                      </item>
                      <item row="0" column="1">
                       <widget class="QLineEdit" name="ppAdjust_LE">
+                       <property name="text">
+                        <string>30</string>
+                       </property>
                        <property name="placeholderText">
-                        <string>15</string>
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -1091,13 +1051,6 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="0">
-                      <widget class="QPushButton" name="ppUndoAdjust_B">
-                       <property name="text">
-                        <string>Undo</string>
-                       </property>
-                      </widget>
-                     </item>
                     </layout>
                    </widget>
                   </item>
@@ -1115,7 +1068,7 @@
                     </property>
                     <layout class="QGridLayout" name="gridLayout_17">
                      <item row="1" column="1">
-                      <widget class="QPushButton" name="ppstitch_B">
+                      <widget class="QPushButton" name="ppStitch_B">
                        <property name="enabled">
                         <bool>true</bool>
                        </property>
@@ -1128,7 +1081,7 @@
                       </widget>
                      </item>
                      <item row="0" column="1">
-                      <widget class="QPushButton" name="horizontalCombine_B">
+                      <widget class="QPushButton" name="ppHorizontalCombine_B">
                        <property name="enabled">
                         <bool>true</bool>
                        </property>
@@ -1159,19 +1112,15 @@
                      <item row="1" column="1">
                       <widget class="QPushButton" name="ppInterpolate_B">
                        <property name="text">
-                        <string>Interpolate and crop</string>
+                        <string>Interpolate</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="4" column="0">
-                      <widget class="QCheckBox" name="cropCheckBox_2">
-                       <property name="text">
-                        <string>Crop output</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="1">
+                     <item row="4" column="1">
                       <widget class="QLineEdit" name="cropstartLineEdit_2">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -1189,15 +1138,21 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="0">
+                     <item row="4" column="0">
                       <widget class="QLabel" name="label_22">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string>Start Frame:</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="7" column="1">
+                     <item row="6" column="1">
                       <widget class="QLineEdit" name="maLineEdit_2">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -1218,8 +1173,11 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="7" column="0">
+                     <item row="6" column="0">
                       <widget class="QLabel" name="maLabel_2">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string>MA periods:</string>
                        </property>
@@ -1228,8 +1186,11 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="1">
+                     <item row="5" column="1">
                       <widget class="QLineEdit" name="cropendLineEdit_2">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -1247,17 +1208,13 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="0">
+                     <item row="5" column="0">
                       <widget class="QLabel" name="label_23">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string>End Frame:</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QCheckBox" name="interpolateCheckBox_2">
-                       <property name="text">
-                        <string>Interpolate missing values</string>
                        </property>
                       </widget>
                      </item>
