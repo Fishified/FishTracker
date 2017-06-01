@@ -16,6 +16,7 @@ class VideoTracking():
         
     def preview(self):
         cap = cv2.VideoCapture(self.myrefvideopath)
+        self.myrefQtextEdit.append("Playing preview. Click video window and press 'q' or click 'Stop' button to cancel")
         while(True):
             (grabbed, frame) = cap.read()
             
@@ -27,7 +28,7 @@ class VideoTracking():
             
             cv2.namedWindow("Preview", cv2.WINDOW_NORMAL) 
             cv2.imshow("Preview",currentframe)  
-            self.myrefQtextEdit.append("Playing preview. Click video window and press 'q' or click 'Stop' button to cancel")
+            
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break  
         cap.release()

@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['Tracker.py'],
-             pathex=['C:\\Users\\Jason\\Desktop\\Tracker'],
-             binaries=None,
-             datas=None,
+             pathex=['C:\\Users\\Jason\\Desktop\\FishTracker'],
+             binaries=[],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

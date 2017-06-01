@@ -7,7 +7,7 @@ from glob import glob
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4 import QtCore
-from PyQt4.QtGui import QFileDialog
+#from PyQt4.QtGui import QFileDialog
 
 import cv2
 import numpy as np
@@ -18,31 +18,6 @@ import calibration
 import postProcessing
 import videoTracking
 
-class PandasModel(QtCore.QAbstractTableModel):
-    """
-    Class to populate a table view with a pandas dataframe
-    """
-    def __init__(self, data, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self._data = data
-
-    def rowCount(self, parent=None):
-        return len(self._data.values)
-
-    def columnCount(self, parent=None):
-        return self._data.columns.size
-
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        if index.isValid():
-            if role == QtCore.Qt.DisplayRole:
-                return str(self._data.values[index.row()][index.column()])
-        return None
-
-    def headerData(self, col, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self._data.columns[col]
-        return None
-        
 
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
@@ -65,6 +40,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.simplelist=[]
         
         #calibrate
+        self.calChosepath_B.clicked.connect(self.getPath)
         self.calLoadCalibrate_B.clicked.connect(self.initiateCalibrate)
         self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
         self.calClearTE_B.clicked.connect(self.textEditClear)
@@ -83,7 +59,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         #post-process
         self.ppFileOpen_B.clicked.connect(self.pp_openCSV)
-        self.ppClean_B.clicked.connect(self.cleanup)#attached to clean case routine
+        self.ppClean_B.clicked.connect(self.cleanup)
         self.ppBlank_B.clicked.connect(self.ppBlank)
         self.ppUndo_B.clicked.connect(self.ppUndo)
         self.ppStitch_B.clicked.connect(self.ppStitch)
@@ -110,23 +86,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
     def play_movie(self):
         
-
         self.framerate=int(self.trkFramerate_LE.text())
         self.cameraID=int(self.cameraIdLineEdit.text())
-        print self.framerate
         
-        self.path, filename=os.path.split(os.path.abspath(self.video))
-        self.path='%s\\'%self.path
-        
-
-        try:
-            self.tag=int(self.path[-15:-3])                     #extract tag number from path
-            self.attempt=int(self.path[-2])
-            self.trial=int(self.path[-17])
-        except ValueError:
-            self.tag=None
-            self.attempt=None
-            self.trial=None
+        self.pathThrow, filename=os.path.split(os.path.abspath(self.video))
 
         self.vidstr=str(self.video)
         self.cap = cv2.VideoCapture(self.vidstr)
@@ -241,24 +204,24 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                         self.track_TE.append("Detection on frame: %d" % count)
                 
 
-            if self.novidCheckBox.isChecked()==False:
-                cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
-                cv2.imshow("Background removed",currentframe)               
-                cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL) 
-                cv2.imshow("Tracking",originalframe)   
+            
+            cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
+            cv2.imshow("Background removed",currentframe)               
+            cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL) 
+            cv2.imshow("Tracking",originalframe)   
             
             #variables used to increase/decrease video playback speed
             self.vidSpeedMultiplier=int(self.playbackSlider.value())
             self.framerate=float(self.framerate)
             a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
             
-            if self.novidCheckBox.isChecked()==False:
-                time.sleep(a)
+            
+            time.sleep(a)
                 #breaks out 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    self.trackButton.setChecked(False)
-                    self.trackButton.setText('Play')
-                    break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.trkTrack_B.setChecked(False)
+                self.trkTrack_B.setText('Play')
+                break
             count = count +1
             
         self.cap.release()
@@ -266,18 +229,20 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.fishcoords=np.transpose(self.fishcoords)
         self.fishcoords=pd.DataFrame(self.fishcoords)
-        self.fishcoords.to_csv("%s%s_raw.csv" %(self.path,self.cameraID))
+        self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraID))
+       
         
     def open(self):
-        fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
+
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files (*.mp4)")# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
         
-    def openCSV(self):
-        fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
-        self.ppFileLoaded_L.setText(fileobj)
-        self.CSVfile=fileobj
+#    def openCSV(self):
+#        fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
+#        self.ppFileLoaded_L.setText(fileobj)
+#        self.CSVfile=fileobj
         
     def preview(self):
         self.tracking.preview() 
@@ -291,8 +256,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                                           reftrialIndex_LE=self.trialIndex_LE,
                                           refcameraID_LE=self.cameraID_LE,
                                           refdistance2pnts_LE=self.distance2pnts_LE,
-                                          refrefDistance_LE=self.refDistance_LE)
-        self.cal.openCalibration()
+                                          refrefDistance_LE=self.refDistance_LE,refpath=self.path)
+        
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path) 
+        self.cal.openCalibration(fileobj)
         
     def doCalibration(self):
         self.cal.doCalibration()
@@ -313,7 +280,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppfileobj=[]
         self.calfile=[]
         
-        self.ppfileobj=QFileDialog.getOpenFileNames(self, filter="Text Files (*.csv)")
+        self.ppfileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.csv)")
        
         for i in range(len(self.ppfileobj)):
             self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj[i]))
@@ -322,13 +289,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             self.ppnamelist.append(slicestr)
             self.csvList_LW.addItem(self.ppnamelist[i])
 
-            
-            for name in glob("%s\Calibration_files\*" % self.pppath):
-                a="%s\Calibration_files\\%s.cal" % (self.pppath,self.cameraid)
+             
+            for name in glob("%s\Calibration_files\*" % self.path):
+                a="%s\Calibration_files\\%s.cal" % (self.path,self.cameraid)
                 if name == a:
                     self.calfile.append(name)
         
-        self.newlist=[postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i],0,self.framerate) for i in range(len(self.ppnamelist))]
+        self.newlist=[postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i],0,self.framerate,self.path) for i in range(len(self.ppnamelist))]
        
         if len(self.simplelist) == 0:
             self.simplelist=self.newlist
@@ -358,26 +325,26 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         	except IndexError:
         		break
 
-        csvcombined.to_csv("stitch.csv",index_label=False,sep=',')    
+        csvcombined.to_csv("%s\stitch.csv" % self.path,index_label=False,sep=',')    
         
-        stitchPPinstance= postProcessing.postProcessing("Stitch","stitch.csv",self.pp_TV,self.ppFileLoaded_L,self.plot_L,'./Calibration_files/stitch.cal',1,self.framerate)
+        stitchPPinstance= postProcessing.postProcessing("Stitch","%s\stitch.csv" % self.path,self.pp_TV,self.ppFileLoaded_L,self.plot_L,'%s\Calibration_files\stitch.cal' % self.path,1,self.framerate,self.path)
         
         self.simplelist.append(stitchPPinstance)
         self.csvList_LW.addItem( self.simplelist[-1].name)
     
-        self.simplelist[-1].show(3)
+        self.simplelist[-1].show(0)
 
     def ppPopulateStitchList(self):
         self.stitchlist=[]
-        self.pwd=os.getcwd()
         
         for index in xrange(self.csvList_LW.count()):
             if self.csvList_LW.item(index).text()=="Stitch":
                 continue
-            filename="%s_treated.csv" % self.csvList_LW.item(index).text()[0:2]
-            self.stitchlist.append(pd.read_csv('%s\%s' % (self.pwd,filename)))
+            filename="%s\%s_treated.csv" % (self.path,self.csvList_LW.item(index).text()[0:2])
             
-        f = open('./Calibration_files/stitch.cal', 'w+') #opens file and allows it to be overwritten 
+            self.stitchlist.append(pd.read_csv('%s' % (filename)))
+    
+        f = open('%s\\Calibration_files\stitch.cal' % self.path, 'w+') #opens file and allows it to be overwritten 
         f.write("Dummy calibration file for stitch")
         f.close()
 
@@ -414,13 +381,20 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.simplelist[listindex].ppInterpolate()
         
     #utilities
+    def getPath(self):
+        self.path=QFileDialog.getExistingDirectory(self)
+        self.calLabelPath_L.setText(self.path)
+        
+        
     def cleanup(self):
         self.pwd=os.getcwd()
-        for fl in glob("%s\\*_orig.csv" %self.pwd):
+        for fl in glob("%s\\*_orig.csv" %self.path):
             os.remove(fl)
-        for fl in glob("%s\\*_treated.csv" %self.pwd):
+        for fl in glob("%s\\*_treated.csv" %self.path):
             os.remove(fl)
-        for fl in glob("%s\\Stitch.csv" %self.pwd):
+        for fl in glob("%s\\Stitch.csv" %self.path):
+            os.remove(fl)
+        for fl in glob("%s\\*.png" %self.path):
             os.remove(fl)
         
         del self.simplelist[:]
@@ -432,7 +406,31 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
-               
+
+class PandasModel(QtCore.QAbstractTableModel):
+    """
+    Class to populate a table view with a pandas dataframe
+    """
+    def __init__(self, data, parent=None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return len(self._data.values)
+
+    def columnCount(self, parent=None):
+        return self._data.columns.size
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if index.isValid():
+            if role == QtCore.Qt.DisplayRole:
+                return str(self._data.values[index.row()][index.column()])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return self._data.columns[col]
+        return None               
 
 
 app = QApplication(sys.argv)

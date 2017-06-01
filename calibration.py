@@ -7,25 +7,27 @@ Created on Tue May 23 09:11:42 2017
 import cv2
 import os
 
+
 from PyQt4.QtGui import QFileDialog
 
 class Calibration:
     
-    def __init__(self,refcal_TE,refcalVideo_L,reftrialIndex_LE,refcameraID_LE,refdistance2pnts_LE,refrefDistance_LE):
+    def __init__(self,refcal_TE,refcalVideo_L,reftrialIndex_LE,refcameraID_LE,refdistance2pnts_LE,refrefDistance_LE,refpath):
         self.myrefcalVideo_L=refcalVideo_L
         self.myreftrialIndex_LE=reftrialIndex_LE
         self.myrefcameraID_LE=refcameraID_LE
         self.myrefdistance2pnts_LE=refdistance2pnts_LE
         self.myrefrefDistance_LE=refrefDistance_LE
         self.myrefcal_TE=refcal_TE
+        self.refpath=refpath
         
-    def openCalibration(self):
-        self.fileobj=QFileDialog.getOpenFileName() #'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
-        self.myrefcalVideo_L.setText(self.fileobj)
-        self.calibrationvideo=self.fileobj
+    def openCalibration(self,fileobject):
+        self.fileobject=fileobject
+        self.myrefcalVideo_L.setText(self.fileobject)
+        self.calibrationvideo=self.fileobject
         
-        if not os.path.exists('./Calibration_files'):
-            os.makedirs('./Calibration_files')
+        if not os.path.exists('%s\\Calibration_files' % self.refpath):
+            os.makedirs('%s\\Calibration_files' % self.refpath)
             
     def doCalibration(self):
 
@@ -91,8 +93,8 @@ class Calibration:
         
         self.myrefcal_TE.append("O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist))
         self.myrefcal_TE.append("Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(distance)+(self.xdist[2]-self.xdist[0])*deltax,float(distance)+(self.xdist[2]-self.xdist[1])*deltax))
-                
-        f = open('./Calibration_files/%d.cal' %(float(trial),float(cameraID)), 'w+') #opens file and allows it to be overwritten 
+        
+        f = open('%s/Calibration_files/%d.cal' %(self.refpath,float(cameraID)), 'w+') #opens file and allows it to be overwritten 
         f.write(trial+'\n')
         f.write(cameraID+'\n')
         f.write(str(deltax)+'\n')

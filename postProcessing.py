@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
         
 class postProcessing:
     
-    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L,calfile,origFlag,framerate):
+    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L,calfile,origFlag,framerate,refpppath):
         
         self.plot_L=plot_L
         self.name=name
@@ -27,6 +27,8 @@ class postProcessing:
         self.framerate=framerate
         self.pdCSVfile=pd.read_csv(self.ppfileobj)
         self.calfile=calfile
+        self.pppath=refpppath
+        
         with open(self.calfile) as f:
             self.calcontent = f.readlines()
   
@@ -35,68 +37,77 @@ class postProcessing:
             self.cameraid=self.name[0:2]
             self.pdCSVfile.columns= ['Image frame', 'x_px','y_px']
             self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
-
+            
             #add georeferenced coordinates
             self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
             self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
-            self.pdCSVfile.to_csv('%s_orig.csv' %self.cameraid,index_label=False,sep=',')
-            self.pdCSVfile.to_csv('%s_treated.csv' %self.cameraid,index_label=False,sep=',')
+            self.pdCSVfile.to_csv('%s\\%s_orig.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
+            self.pdCSVfile.to_csv('%s\\%s_treated.csv' %(self.pppath,self.cameraid),index_label=False,sep=',')
             self.treated=self.pdCSVfile
+            self.kinematics()
            
 
         if origFlag == 1:
-            self.pdCSVfile.to_csv('Stitch_orig.csv', index_label=False,sep=',')
-            self.pdCSVfile.to_csv('Stitch_treated.csv',index_label=False,sep=',')
+            self.pdCSVfile.to_csv('%s\Stitch_orig.csv'%self.pppath, index_label=False,sep=',')
+            self.pdCSVfile.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
             self.treated=self.pdCSVfile
             self.kinematics()
 
     def show(self,state):
 
         #show for first time
-        if state == 0 and self.loadedFlag == 0:
-            self.treated = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
-            self.kinematics()
-            
-        #show after treating
-        if state == 0 and self.loadedFlag == 1:
-            self.treated=self.treated
-            self.kinematics()
-            
-        if state==1:
-            self.treated=self.treated
-            self.kinematics()
-            
+#        if state == 0 and self.loadedFlag == 0:
+#            self.treated = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
+#            self.kinematics()
+#            
+#        #show after treating
+#        if state == 0 and self.loadedFlag == 1:
+#            self.treated=self.treated
+#            self.kinematics()
+                  
         #show after undoing changes
         if state == 2:
             if self.name == "Stitch":
-                self.treated = pd.read_csv("Stitch_orig.csv",sep =',')
-                self.treated.to_csv('Stitch_treated.csv',index_label=False,sep=',')
+                print "hi in state"
+                self.treated = pd.read_csv("%s\Stitch_orig.csv" %self.pppath,sep =',')
+                self.kinematics()
+                print "made it past kinematics"
+                self.treated.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
+                print "made it threw state"
+              
             else:
-                self.treated = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
-                self.treated.to_csv('%s_treated.csv' %self.cameraid,index_label=False,sep=',')
-        if state == 3:
-            if self.name == "Stitch":
-                self.treated = pd.read_csv("Stitch_orig.csv",sep =',')
-                self.treated.to_csv('Stitch_treated.csv',index_label=False,sep=',')
+                self.treated = pd.read_csv("%s\%s_orig.csv" % (self.pppath, self.cameraid),sep =',')
+                self.treated.to_csv('%s\%s_treated.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
+                self.kinematics()
+#        if state == 3:
+#            if self.name == "Stitch":
+#                self.treated = pd.read_csv("Stitch_orig.csv",sep =',')
+#                self.treated.to_csv('Stitch_treated.csv',index_label=False,sep=',')
 
         
-        self.ppFileLoaded_L.setText("%s.csv" % self.name)        
-        self.pp_TV.setModel(PandasModel(self.treated))
+        self.ppFileLoaded_L.setText("%s\%s.csv" % (self.pppath, self.name))      
+        
         
         if 'Interpolated' in self.treated.columns:
+            print "hi in interpolation"
             self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
+            
         else:
             self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]        
-
+        
+        self.pp_TV.setModel(PandasModel(self.treated))
+       
         ax=self.treated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.635],color='Red',figsize=(10,2))
+        
         self.treated.plot(kind='scatter', x='down', y='y',ax=ax,color='Blue')
+        
         if 'Interpolated' in self.treated.columns:
             self.treated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow')
-
+            
         fig = ax.get_figure()
-        fig.savefig('%s.png' % self.name)
+        fig.savefig('%s\%s.png' % (self.pppath,self.name))
         
-        self.plot_L.setPixmap(QPixmap("%s.png" % self.name))
+        self.plot_L.setPixmap(QPixmap("%s\%s.png" % (self.pppath,self.name)))
         self.loadedFlag=1
     
     def blank(self,rowIndices):
@@ -107,11 +118,11 @@ class postProcessing:
             self.treated.iloc[self.rowIndices[i].row(),1:10]=None
                               
         if self.name == "Stitch":
-            self.treated.to_csv("Stitch_treated.csv",sep =',')
+            self.treated.to_csv("%s\Stitch_treated.csv" %self.pppath,sep =',')
         else :
-            self.treated.to_csv("%s_treated.csv" % self.cameraid,sep =',')
+            self.treated.to_csv("%s\%s_treated.csv" % (self.pppath,self.cameraid),sep =',')
 
-        self.show(1)
+        self.show(0)
         
     def ppAdjust(self,adjust,state):
         #
@@ -131,15 +142,19 @@ class postProcessing:
             self.treated=self.treated.reset_index(drop=True)
             self.treated['Image frame'] = self.treated.index
             
-        self.treated.to_csv("%s_treated.csv" % self.cameraid,index_label=False,sep =',')
+        self.treated.to_csv("%s\%s_treated.csv" % (self.pppath,self.cameraid),index_label=False,sep =',')
         self.show(1)
         
     def ppInterpolate(self):
+        self.treated=self.treated.drop(['u','v','up','down'],axis=1)
+        
         self.treated["Interpolated"]=0
         self.treated.ix[self.treated['x'].isnull(),'Interpolated']=1
-        self.treated=self.treated.interpolate() #interpolate values to use .diff()
+        self.treated=self.treated.interpolate() 
+
         self.treated['Interpolated_x'] = np.where(self.treated['Interpolated'] == 1, self.treated['x'],None)
-        self.show(1)
+        self.kinematics()
+        self.show(0)
 
     def kinematics(self):
         
