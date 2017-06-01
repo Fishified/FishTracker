@@ -39,11 +39,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calfile=[]
         self.simplelist=[]
         
-        #calibrate
+        #calibrate/setup
         self.calChosepath_B.clicked.connect(self.getPath)
         self.calLoadCalibrate_B.clicked.connect(self.initiateCalibrate)
         self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
-        self.calClearTE_B.clicked.connect(self.textEditClear)
         self.calCalibrate_B.clicked.connect(self.doCalibration)
         
         #track
@@ -66,10 +65,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppAdjust_B.clicked.connect(self.ppAdjust)
         self.ppHorizontalCombine_B.clicked.connect(self.pphorizontalCombine)
         self.ppInterpolate_B.clicked.connect(self.ppInterpolate)
-
         self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
         self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
-    
         self.csvList_LW.currentItemChanged.connect(self.ppShow)
 
     def populatecameralist(self):
@@ -120,7 +117,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 
                 self.trkTrack_B.setChecked(False)
                 self.trkTrack_B.setText('Play')
-                self.track_TE.append("Tracking complete or program not able to grab video ... could be a format error. Check file type and try again.")
+                self.track_TE.append("Tracking complete.")
                 break           
             currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
@@ -184,7 +181,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
         
-            biggestcontour=cntarea.index(max(cntarea))#almost always the fish, this is where glare can cause problems if the biggest contour is bigger than the fish's contour
+            biggestcontour=cntarea.index(max(cntarea))
             xcoord.append(xcntcoord[biggestcontour])
             ycoord.append(ycntcoord[biggestcontour])
             
@@ -193,7 +190,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             else:
                 cv2.circle(originalframe, (xcntcoord[biggestcontour], ycntcoord[biggestcontour]),r,(0, 255, 0), 3)
                 
-            self.fishcoords=np.array((xcoord,ycoord),dtype=float) #attributes coordinates of largest contour to fish coordinates
+            self.fishcoords=np.array((xcoord,ycoord),dtype=float) 
              
             for i in range(len(xcoord)):
                 if xcoord[i]==0:
@@ -234,19 +231,17 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def open(self):
 
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files (*.mp4)")# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files (*.mp4)")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
+        print self.video
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
         
-#    def openCSV(self):
-#        fileobj=QFileDialog.getOpenFileName(self)# 'Open Video File', '', None, QFileDialog.DontUseNativeDialog)
-#        self.ppFileLoaded_L.setText(fileobj)
-#        self.CSVfile=fileobj
         
     def preview(self):
-        self.tracking.preview() 
         
+        self.tracking.preview() 
+
     """
     Calibration
     """
@@ -267,14 +262,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def outputCalFile(self):
         self.cal.outputCalFile()
         
-    def textEditClear(self):
-    
-            self.cal_TE.clear()
-            
     """
     post-processing
     """
-
     def pp_openCSV(self):
         self.ppnamelist=[]
         self.ppfileobj=[]
@@ -307,18 +297,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.simplelist[listindex].show(0)
         
     def ppStitch(self):
+        self.csvList_LW.clear()
         
         for i in range(len(self.simplelist)):
             if self.simplelist[i].name=="Stitch":
                 del self.simplelist[i]
                 
-        self.csvList_LW.clear()
         for i in range(len(self.simplelist)):
             self.csvList_LW.addItem(self.simplelist[i].name)
                 
-                
         self.ppPopulateStitchList()
-        csvcombined=self.stitchlist[0]#initiate list with first camera list
+        csvcombined=self.stitchlist[0]
+        
         for i in range(len(self.stitchlist)):
         	try:
         		csvcombined=csvcombined.combine_first(self.stitchlist[i+1])
@@ -327,29 +317,29 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
         csvcombined.to_csv("%s\stitch.csv" % self.path,index_label=False,sep=',')    
         
-        stitchPPinstance= postProcessing.postProcessing("Stitch","%s\stitch.csv" % self.path,self.pp_TV,self.ppFileLoaded_L,self.plot_L,'%s\Calibration_files\stitch.cal' % self.path,1,self.framerate,self.path)
-        
+        stitchPPinstance= postProcessing.postProcessing("Stitch","%s\stitch.csv" % self.path,
+                                                        self.pp_TV,self.ppFileLoaded_L,
+                                                        self.plot_L,
+                                                        '%s\Calibration_files\stitch.cal' % self.path,
+                                                        1,
+                                                        self.framerate,self.path)
         self.simplelist.append(stitchPPinstance)
         self.csvList_LW.addItem( self.simplelist[-1].name)
-    
         self.simplelist[-1].show(0)
 
     def ppPopulateStitchList(self):
         self.stitchlist=[]
-        
         for index in xrange(self.csvList_LW.count()):
             if self.csvList_LW.item(index).text()=="Stitch":
                 continue
             filename="%s\%s_treated.csv" % (self.path,self.csvList_LW.item(index).text()[0:2])
-            
             self.stitchlist.append(pd.read_csv('%s' % (filename)))
     
-        f = open('%s\\Calibration_files\stitch.cal' % self.path, 'w+') #opens file and allows it to be overwritten 
+        f = open('%s\\Calibration_files\stitch.cal' % self.path, 'w+')
         f.write("Dummy calibration file for stitch")
         f.close()
 
     def ppBlank(self):
-        
         listindex = self.csvList_LW.currentRow()
         self.simplelist[listindex].blank(self.pp_TV.selectionModel().selectedRows())
         

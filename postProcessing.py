@@ -46,7 +46,6 @@ class postProcessing:
             self.treated=self.pdCSVfile
             self.kinematics()
            
-
         if origFlag == 1:
             self.pdCSVfile.to_csv('%s\Stitch_orig.csv'%self.pppath, index_label=False,sep=',')
             self.pdCSVfile.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
@@ -55,15 +54,6 @@ class postProcessing:
 
     def show(self,state):
 
-        #show for first time
-#        if state == 0 and self.loadedFlag == 0:
-#            self.treated = pd.read_csv("%s_orig.csv" % self.cameraid,sep =',')
-#            self.kinematics()
-#            
-#        #show after treating
-#        if state == 0 and self.loadedFlag == 1:
-#            self.treated=self.treated
-#            self.kinematics()
                   
         #show after undoing changes
         if state == 2:
@@ -79,14 +69,8 @@ class postProcessing:
                 self.treated = pd.read_csv("%s\%s_orig.csv" % (self.pppath, self.cameraid),sep =',')
                 self.treated.to_csv('%s\%s_treated.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
                 self.kinematics()
-#        if state == 3:
-#            if self.name == "Stitch":
-#                self.treated = pd.read_csv("Stitch_orig.csv",sep =',')
-#                self.treated.to_csv('Stitch_treated.csv',index_label=False,sep=',')
 
-        
         self.ppFileLoaded_L.setText("%s\%s.csv" % (self.pppath, self.name))      
-        
         
         if 'Interpolated' in self.treated.columns:
             print "hi in interpolation"
@@ -168,10 +152,6 @@ class postProcessing:
         self.treated.ix[(self.treated['u']>=0),'down']=None
         self.treated.ix[self.treated['u'].isnull(),'down']=None
         self.treated.ix[self.treated['u'].isnull(),'up']=None
-        
-
-        
-
         
 class PandasModel(QtCore.QAbstractTableModel):
     """

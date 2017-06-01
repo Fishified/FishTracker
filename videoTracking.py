@@ -8,7 +8,7 @@ import cv2
 
 class VideoTracking():
     
-    def __init__(self,refQtextEdit,refvideopath,parent=None):
+    def __init__(self,refQtextEdit,refvideopath):
         self.myrefvideopath=refvideopath
         self.myrefQtextEdit=refQtextEdit
         self.myrefQtextEdit.append(self.myrefvideopath)
