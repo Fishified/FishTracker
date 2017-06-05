@@ -12,6 +12,9 @@ from PyQt4 import QtCore
 import cv2
 import numpy as np
 import pandas as pd
+import shutil
+from distutils.dir_util import copy_tree
+
 
 import tracker_ui
 import calibration
@@ -44,6 +47,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calLoadCalibrate_B.clicked.connect(self.initiateCalibrate)
         self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
         self.calCalibrate_B.clicked.connect(self.doCalibration)
+        self.calRectify_B.clicked.connect(self.doRectify)
+        self.calChoseExisting_B.clicked.connect(self.openCalibration)
         
         #track
         self.trkTrack_B.clicked.connect(self.play_movie)
@@ -85,9 +90,22 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.framerate=int(self.trkFramerate_LE.text())
         self.cameraID=int(self.cameraIdLineEdit.text())
+        self.pathThrow, self.filename=os.path.split(os.path.abspath(self.video))
+        print "hi"
+        self.cameraid=self.filename[0:2]
         
-        self.pathThrow, filename=os.path.split(os.path.abspath(self.video))
-
+        for name in glob("%s\Calibration_files\*" % self.path):
+            a="%s\Calibration_files\\%s_matrix.csv" % (self.path,self.cameraid)
+            if name == a:
+                print "do I go in here"
+                transMatrix=np.genfromtxt('%s\Calibration_files\\%s_matrix.csv' % (self.path,self.cameraid),delimiter=',')
+        try:
+            print transMatrix
+            print "Transformation matrix found"
+            transfoMat=1
+        except NameError:
+            transfoMat=0
+            
         self.vidstr=str(self.video)
         self.cap = cv2.VideoCapture(self.vidstr)
         self.fgbg=cv2.BackgroundSubtractorMOG()
@@ -112,15 +130,22 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 
             (grabbed, frame) = self.cap.read()
             originalframe=frame
+            rows,cols,ch = frame.shape
 
             if not grabbed:
                 
                 self.trkTrack_B.setChecked(False)
                 self.trkTrack_B.setText('Play')
                 self.track_TE.append("Tracking complete.")
-                break           
-            currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                break
             
+            if transfoMat==1:
+                adjusted=cv2.warpAffine(frame,transMatrix,(cols,rows))
+                currentframe = cv2.cvtColor(adjusted, cv2.COLOR_BGR2RGB)
+            else:
+                adjusted=frame
+                currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#            currentframe = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             #fills in timestamp digits to prevent detection
             if self.removeDigitsCheckBox.isChecked() == True:
                 currentframe[np.where((currentframe == [255,255,255]).all(axis = 2))] = [0,0,0]            
@@ -180,6 +205,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
+                self.track_TE.append(str(cv2.contourArea(c)))
         
             biggestcontour=cntarea.index(max(cntarea))
             xcoord.append(xcntcoord[biggestcontour])
@@ -196,16 +222,17 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 if xcoord[i]==0:
                     pass
                 else:
-                    cv2.circle(originalframe, (xcoord[i], ycoord[i]),6, (0, 0, 255),thickness=-1)
+                    cv2.circle(adjusted, (xcoord[i], ycoord[i]),6, (0, 0, 255),thickness=-1)
                     if i == len(xcoord)-1:
                         self.track_TE.append("Detection on frame: %d" % count)
+                        
                 
 
             
             cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
             cv2.imshow("Background removed",currentframe)               
             cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL) 
-            cv2.imshow("Tracking",originalframe)   
+            cv2.imshow("Tracking",adjusted)   
             
             #variables used to increase/decrease video playback speed
             self.vidSpeedMultiplier=int(self.playbackSlider.value())
@@ -245,6 +272,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     """
     Calibration
     """
+    
+    def openCalibration(self):
+        self.calpath=QFileDialog.getExistingDirectory(self)
+        try:
+            os.makedirs('%s\\Calibration_files' % self.path)
+        except WindowsError:
+            pass
+        dest="%s\\Calibration_files\\" % self.path
+        print dest
+        copy_tree("%s\\" % self.calpath, "%s\\Calibration_files\\" % self.path)
+
+        
     def initiateCalibrate(self):
         self.cal=calibration.Calibration(refcal_TE=self.cal_TE,
                                           refcalVideo_L=self.calVideo_L,
@@ -258,6 +297,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def doCalibration(self):
         self.cal.doCalibration()
+        
+    def doRectify(self):
+        self.cal.perspectiveTransform()
         
     def outputCalFile(self):
         self.cal.outputCalFile()
@@ -279,7 +321,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             self.ppnamelist.append(slicestr)
             self.csvList_LW.addItem(self.ppnamelist[i])
 
-             
             for name in glob("%s\Calibration_files\*" % self.path):
                 a="%s\Calibration_files\\%s.cal" % (self.path,self.cameraid)
                 if name == a:
