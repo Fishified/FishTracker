@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1032</width>
-    <height>735</height>
+    <height>690</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -49,22 +49,6 @@
         <string>Folder setup</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
-        <item row="0" column="1">
-         <widget class="QTextEdit" name="cal_TE"/>
-        </item>
-        <item row="1" column="1">
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="0" column="0">
          <widget class="QFrame" name="frame">
           <property name="frameShape">
@@ -83,8 +67,48 @@
               <string>Define new calibration:</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_23">
+              <item row="1" column="0">
+               <widget class="QPushButton" name="calLoadCalibrate_B">
+                <property name="text">
+                 <string>Load Video</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QListWidget" name="cal_LW"/>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="calVideo_L">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="0">
-               <widget class="QCheckBox" name="checkBox">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Active video for calibration:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="calRectify_B">
+                <property name="toolTip">
+                 <string>Input three points to define rotation angle. Choose points 1 and 2 so they lie along a horiztonal line. Chose point three so that it shares the same x coordinate as point 1. </string>
+                </property>
+                <property name="statusTip">
+                 <string>Rectify Image: Points 1 and 2 should lie along a straight line. Point 3 should be at the same x coordinate as point 1, but at a different y.</string>
+                </property>
+                <property name="text">
+                 <string>Rectify</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QCheckBox" name="calRectify_CB">
+                <property name="statusTip">
+                 <string>Select to rectify image before calibration</string>
+                </property>
                 <property name="text">
                  <string>Rectify image for camera angle</string>
                 </property>
@@ -93,41 +117,10 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QPushButton" name="calLoadCalibrate_B">
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_8">
                 <property name="text">
-                 <string>Load Video</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_16">
-                <property name="text">
-                 <string>Path:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QPushButton" name="calRectify_B">
-                <property name="toolTip">
-                 <string>Input three points to define rotation angle. Choose points 1 and 2 so they lie along a horiztonal line. Chose point three so that it shares the same x coordinate as point 1. </string>
-                </property>
-                <property name="text">
-                 <string>Rectify</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLabel" name="calVideo_L">
-                <property name="text">
-                 <string>TextLabel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QPushButton" name="calCalibrate_B">
-                <property name="text">
-                 <string>Calibrate</string>
+                 <string>Select calibration to modify:</string>
                 </property>
                </widget>
               </item>
@@ -135,12 +128,15 @@
             </widget>
            </item>
            <item row="5" column="0" colspan="2">
-            <widget class="QGroupBox" name="groupBox_6">
+            <widget class="QGroupBox" name="calParameters_GB">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="title">
               <string>Calibration Parameters</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_12">
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QLineEdit" name="cameraID_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -162,7 +158,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <widget class="QLineEdit" name="distance2pnts_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -184,43 +180,14 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QPushButton" name="calMakeCalFile_B">
-                <property name="text">
-                 <string>Make calibration files</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLineEdit" name="refDistance_LE">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>60</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="text">
                  <string>Distance of known point to reference point:</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
+              <item row="1" column="1">
                <widget class="QLineEdit" name="trialIndex_LE">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -242,24 +209,60 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="label_14">
                 <property name="text">
                  <string>Distance between points 1 and 2 (m):</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="label_13">
                 <property name="text">
                  <string>Enter camera ID:</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
+              <item row="4" column="1">
+               <widget class="QLineEdit" name="refDistance_LE">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
                <widget class="QLabel" name="label_12">
                 <property name="text">
                  <string>Enter trial index:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QPushButton" name="calCalibrate_B">
+                <property name="text">
+                 <string>Calibrate selected video</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="calMakeCalFile_B">
+                <property name="text">
+                 <string>Make calibration files</string>
                 </property>
                </widget>
               </item>
@@ -342,6 +345,29 @@
             </spacer>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="1">
+         <widget class="QTextEdit" name="cal_TE"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Clear Table</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -1683,10 +1709,17 @@
       </widget>
      </widget>
     </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="activePath_L">
+      <property name="text">
+       <string>No path specified</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QLabel" name="projectPath_L">
       <property name="text">
-       <string>TextLabel</string>
+       <string>Active Project Path:</string>
       </property>
      </widget>
     </item>
@@ -1757,7 +1790,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
+   <sender>calRectify_CB</sender>
    <signal>toggled(bool)</signal>
    <receiver>calRectify_B</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1785,6 +1818,38 @@
     <hint type="destinationlabel">
      <x>159</x>
      <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>calParameters_GB</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>351</x>
+     <y>171</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>389</x>
+     <y>442</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cal_TE</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>561</x>
+     <y>587</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>563</y>
     </hint>
    </hints>
   </connection>

@@ -41,14 +41,16 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppClasslist=[]
         self.calfile=[]
         self.simplelist=[]
+        self.master_calList=[]
         
         #calibrate/setup
         self.calChosepath_B.clicked.connect(self.getPath)
-        self.calLoadCalibrate_B.clicked.connect(self.initiateCalibrate)
+        self.calLoadCalibrate_B.clicked.connect(self.newCalibration)
         self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
         self.calCalibrate_B.clicked.connect(self.doCalibration)
         self.calRectify_B.clicked.connect(self.doRectify)
         self.calChoseExisting_B.clicked.connect(self.openCalibration)
+#        self.cal_LW.currentItemChanged.connect(self.calActivate)
         
         #track
         self.trkTrack_B.clicked.connect(self.play_movie)
@@ -261,7 +263,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files (*.mp4)")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
-        print self.video
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
         
         
@@ -275,35 +276,58 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
     def openCalibration(self):
         self.calpath=QFileDialog.getExistingDirectory(self)
+        
         try:
             os.makedirs('%s\\Calibration_files' % self.path)
         except WindowsError:
             pass
+        
         dest="%s\\Calibration_files\\" % self.path
-        print dest
         copy_tree("%s\\" % self.calpath, "%s\\Calibration_files\\" % self.path)
 
-        
-    def initiateCalibrate(self):
-        self.cal=calibration.Calibration(refcal_TE=self.cal_TE,
-                                          refcalVideo_L=self.calVideo_L,
-                                          reftrialIndex_LE=self.trialIndex_LE,
-                                          refcameraID_LE=self.cameraID_LE,
-                                          refdistance2pnts_LE=self.distance2pnts_LE,
-                                          refrefDistance_LE=self.refDistance_LE,refpath=self.path)
-        
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path) 
-        self.cal.openCalibration(fileobj)
-        
     def doCalibration(self):
-        self.cal.doCalibration()
+        if self.calRectify_CB.isChecked()==True:
+            self.rectify=True
+        else:
+            self.rectify=False
+            
+        listindex = self.cal_LW.currentRow()
+        self.master_calList[listindex].doCalibration(self.rectify)
         
+    def newCalibration(self):
+        
+        self.calNamelist=[]
+        self.calFileobj=[]
+        self.calCameraID=[]
+        self.fullPath=[]
+
+        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Text Files (*.mp4)")
+       
+        for i in range(len(self.calFileobj)):
+            self.pathThrow, self.calFilename=os.path.split(os.path.abspath(self.calFileobj[i]))
+            self.fullPath.append(os.path.abspath(self.calFileobj[i]))
+            slicestr=self.calFilename[0:6]
+            self.calCameraID=self.calFilename[0:2]
+            self.calNamelist.append(slicestr)
+            self.cal_LW.addItem(self.calNamelist[i])
+
+        self.toAppend_calList=[calibration.Calibration(self.calNamelist[i],self.path,self.fullPath[i],
+                                                       self.cal_TE) for i in range(len(self.calNamelist))]
+
+        if len(self.master_calList) == 0:
+            self.master_calList=self.toAppend_calList
+        else:
+            self.master_calList=self.master_calList+self.toAppend_calList
+        
+ 
     def doRectify(self):
-        self.cal.perspectiveTransform()
+        listindex = self.cal_LW.currentRow()
+        self.master_calList[listindex].perspectiveTransform()
         
     def outputCalFile(self):
-        self.cal.outputCalFile()
-        
+        listindex = self.cal_LW.currentRow()
+        self.master_calList[listindex].outputCalFile(self.trialIndex_LE.text(),self.cameraID_LE.text(),self.distance2pnts_LE.text(),self.refDistance_LE.text())
+
     """
     post-processing
     """
@@ -415,7 +439,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def getPath(self):
         self.path=QFileDialog.getExistingDirectory(self)
         self.calLabelPath_L.setText(self.path)
-        
+        self.activePath_L.setText(self.path)
         
     def cleanup(self):
         self.pwd=os.getcwd()

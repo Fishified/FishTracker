@@ -13,36 +13,38 @@ from PyQt4.QtGui import QFileDialog
 
 class Calibration:
     
-    def __init__(self,refcal_TE,refcalVideo_L,reftrialIndex_LE,refcameraID_LE,refdistance2pnts_LE,refrefDistance_LE,refpath):
-        self.myrefcalVideo_L=refcalVideo_L
-        self.myreftrialIndex_LE=reftrialIndex_LE
-        self.myrefcameraID_LE=refcameraID_LE
-        self.myrefdistance2pnts_LE=refdistance2pnts_LE
-        self.myrefrefDistance_LE=refrefDistance_LE
-        self.myrefcal_TE=refcal_TE
-        self.refpath=refpath
+    def __init__(self,name,path,fullpath,cal_TE):
+        self.name=name
+        self.path=path
+        self.fullpath=fullpath
+        self.cal_TE=cal_TE
         
-    def openCalibration(self,fileobject):
-        self.fileobject=fileobject
-        self.myrefcalVideo_L.setText(self.fileobject)
-        self.calibrationvideo=self.fileobject
-        
-        if not os.path.exists('%s\\Calibration_files' % self.refpath):
-            os.makedirs('%s\\Calibration_files' % self.refpath)
-            
-    def doCalibration(self):
+        try:
+            os.makedirs('%s\\Calibration_files' % self.path)
+        except WindowsError:
+            pass
 
-        self.video=str(self.calibrationvideo)
-        self.camera = cv2.VideoCapture(self.video)
+
+    def doCalibration(self,rectify):
+        self.rectify=rectify
         
-        success, firstFrame = self.camera.read() #reads only the first image of the video for calibration function
+        self.video=str(self.fullpath)
+        self.camera = cv2.VideoCapture(self.video)
+
+          
+        success, firstFrame = self.camera.read() 
+        
+        if rectify==True:
+            rows,cols,ch = firstFrame.shape
+            firstFrame = cv2.warpAffine(firstFrame,self.M,(cols,rows))
+
         
         self.xdist=[]
         self.ydist=[]
         self.count = 0
         #mouse callback function, draws points and captures coordinates
         def draw_circle(event,x,y,flags,param):
-#            global ix,iy,count,xdist,ydist
+            global ix,iy,count,xdist,ydist
         
             if event == cv2.EVENT_LBUTTONDOWN:
                 cv2.circle(firstFrame,(x,y),2,(0,255,0),-1)
@@ -55,12 +57,18 @@ class Calibration:
                 iy=y
                 self.xdist.append(ix)
                 self.ydist.append(iy)
-        
-        cv2.namedWindow('firstframe')
-        cv2.setMouseCallback('firstframe',draw_circle)
-        
-        while self.count <= 3:#keeps window open as long as count is less than 3 so user can interact with setMouseCallback
-            cv2.imshow('firstframe',firstFrame)
+        def showWindows():
+            
+            cv2.namedWindow('Calibration frame')
+            cv2.setMouseCallback('Calibration frame',draw_circle)
+            cv2.imshow('Calibration frame',firstFrame)
+            self.k = cv2.waitKey(1) & 0xFF
+            if self.k == ord('q'):
+                cv2.camera.release()
+                cv2.destroyAllwindows()
+                
+        while self.count <= 3:
+            showWindows()
             if self.count==0:
                 cv2.putText(firstFrame, "1. Place first point (1)", (10, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 label="Point 1"
@@ -74,17 +82,12 @@ class Calibration:
                 label="Known point"
                 
             if self.count==3:
-                cv2.putText(firstFrame, "Press 'q' to quit and enter parameters...", (10, 80),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                
-            k = cv2.waitKey(1) & 0xFF
-            if k == ord('q'):
-                cv2.camera.realease()
-                cv2.destroyAllWindows()
-                break
-            
+                cv2.putText(firstFrame, "Exit pop-up and enter parameters ...", (10, 80),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+         
     def perspectiveTransform(self):
 
-        self.video=str(self.calibrationvideo)
+        self.video=str(self.fullpath)
         self.camera = cv2.VideoCapture(self.video)
         
         success, firstFrame = self.camera.read() #reads only the first image of the video for calibration function
@@ -163,30 +166,33 @@ class Calibration:
         cv2.imshow('dst',dst)
         
         print self.M
-        return self.M
 
-    def outputCalFile(self):
-          
-        trial=self.myreftrialIndex_LE.text()
-        cameraID=self.myrefcameraID_LE.text()
+    def outputCalFile(self,trialIndex,cameraID,distance2pnts,refDistance):
+        self.trailIndex=trialIndex
+        self.cameraID=cameraID
+        self.distance2pnts=distance2pnts
+        self.refDistance=refDistance
         
-        seperation = self.myrefdistance2pnts_LE.text()
-        distance = self.myrefrefDistance_LE.text()
+        self.trial=trialIndex
+        self.cameraID=cameraID
         
-        deltax=float(seperation)/((self.xdist[0]-self.xdist[1])**2+(self.ydist[0]-self.ydist[1])**2)**0.5
+        self.seperation = distance2pnts
+        self.distance = refDistance
+        print self.xdist
+        deltax=float(self.seperation)/((self.xdist[0]-self.xdist[1])**2+(self.ydist[0]-self.ydist[1])**2)**0.5
         pixperdist=0.1/deltax
+        print "amde it past calculations"
+        self.cal_TE.append("O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist))
+        self.cal_TE.append("Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(self.distance)+(self.xdist[2]-self.xdist[0])*deltax,float(self.distance)+(self.xdist[2]-self.xdist[1])*deltax))
         
-        self.myrefcal_TE.append("O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist))
-        self.myrefcal_TE.append("Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(distance)+(self.xdist[2]-self.xdist[0])*deltax,float(distance)+(self.xdist[2]-self.xdist[1])*deltax))
-        
-        f = open('%s/Calibration_files/%d.cal' %(self.refpath,float(cameraID)), 'w+') #opens file and allows it to be overwritten 
-        f.write(trial+'\n')
-        f.write(cameraID+'\n')
+        f = open('%s/Calibration_files/%d.cal' %(self.path,float(self.cameraID)), 'w+') #opens file and allows it to be overwritten 
+        f.write(self.trial+'\n')
+        f.write(self.cameraID+'\n')
         f.write(str(deltax)+'\n')
-        f.write(str(distance)+'\n')
+        f.write(str(self.distance)+'\n')
         f.write(str(self.xdist[2])+'\n')
         f.write(str(self.ydist[2])+'\n')
         f.write(str(self.M)+'\n')
         f.close()
         
-        np.savetxt('%s/Calibration_files/%d_matrix.csv' %(self.refpath,float(cameraID)), self.M, delimiter=',')
+        np.savetxt('%s/Calibration_files/%d_matrix.csv' %(self.path,float(self.cameraID)), self.M, delimiter=',')
