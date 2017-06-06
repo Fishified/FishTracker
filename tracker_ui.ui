@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1032</width>
-    <height>690</height>
+    <height>708</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -942,10 +942,26 @@
                    </layout>
                   </widget>
                  </item>
-                 <item row="6" column="1">
-                  <widget class="QLabel" name="label_21">
+                 <item row="3" column="1">
+                  <widget class="QPushButton" name="trkTrack_B">
+                   <property name="toolTip">
+                    <string>Starts object tracking on currently loaded video.</string>
+                   </property>
                    <property name="text">
-                    <string>Help box:</string>
+                    <string>Track</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QTextBrowser" name="track_TE"/>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLabel" name="label_control_Playback">
+                   <property name="text">
+                    <string>Control video playback speed:</string>
                    </property>
                   </widget>
                  </item>
@@ -965,30 +981,14 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLabel" name="label_control_Playback">
+                 <item row="7" column="1">
+                  <widget class="QLabel" name="label_21">
                    <property name="text">
-                    <string>Control video playback speed:</string>
+                    <string>Help box:</string>
                    </property>
                   </widget>
                  </item>
                  <item row="5" column="1">
-                  <widget class="QTextBrowser" name="track_TE"/>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QPushButton" name="trkTrack_B">
-                   <property name="toolTip">
-                    <string>Starts object tracking on currently loaded video.</string>
-                   </property>
-                   <property name="text">
-                    <string>Track</string>
-                   </property>
-                   <property name="checkable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
                   <widget class="QSlider" name="playbackSlider">
                    <property name="toolTip">
                     <string>Speed up or slow down video</string>
@@ -1007,6 +1007,16 @@
                    </property>
                    <property name="tickPosition">
                     <enum>QSlider::TicksBelow</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QCheckBox" name="trackRectify_CB">
+                   <property name="text">
+                    <string>Track on rectified video</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -1796,12 +1806,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>297</y>
+     <x>159</x>
+     <y>371</y>
     </hint>
     <hint type="destinationlabel">
-     <x>140</x>
-     <y>317</y>
+     <x>191</x>
+     <y>400</y>
     </hint>
    </hints>
   </connection>
@@ -1839,17 +1849,17 @@
   </connection>
   <connection>
    <sender>pushButton</sender>
-   <signal>toggled(bool)</signal>
+   <signal>clicked()</signal>
    <receiver>cal_TE</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>561</x>
-     <y>587</y>
+     <x>785</x>
+     <y>607</y>
     </hint>
     <hint type="destinationlabel">
-     <x>582</x>
-     <y>563</y>
+     <x>825</x>
+     <y>590</y>
     </hint>
    </hints>
   </connection>

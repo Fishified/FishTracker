@@ -95,18 +95,20 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.pathThrow, self.filename=os.path.split(os.path.abspath(self.video))
         print "hi"
         self.cameraid=self.filename[0:2]
-        
-        for name in glob("%s\Calibration_files\*" % self.path):
-            a="%s\Calibration_files\\%s_matrix.csv" % (self.path,self.cameraid)
-            if name == a:
-                print "do I go in here"
-                transMatrix=np.genfromtxt('%s\Calibration_files\\%s_matrix.csv' % (self.path,self.cameraid),delimiter=',')
-        try:
-            print transMatrix
-            print "Transformation matrix found"
-            transfoMat=1
-        except NameError:
-            transfoMat=0
+        transfoMat=0
+        if self.trackRectify_CB.isChecked():
+            
+            for name in glob("%s\Calibration_files\*" % self.path):
+                a="%s\Calibration_files\\%s_matrix.csv" % (self.path,self.cameraid)
+                if name == a:
+                    print "do I go in here"
+                    transMatrix=np.genfromtxt('%s\Calibration_files\\%s_matrix.csv' % (self.path,self.cameraid),delimiter=',')
+            try:
+                print transMatrix
+                print "Transformation matrix found"
+                transfoMat=1
+            except NameError:
+                transfoMat=0
             
         self.vidstr=str(self.video)
         self.cap = cv2.VideoCapture(self.vidstr)
@@ -131,8 +133,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 self.trkTrack_B.setText('Stop')
                 
             (grabbed, frame) = self.cap.read()
-            originalframe=frame
-            rows,cols,ch = frame.shape
+
 
             if not grabbed:
                 
@@ -140,7 +141,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 self.trkTrack_B.setText('Play')
                 self.track_TE.append("Tracking complete.")
                 break
-            
+            originalframe=frame
+            rows,cols,ch = frame.shape
             if transfoMat==1:
                 adjusted=cv2.warpAffine(frame,transMatrix,(cols,rows))
                 currentframe = cv2.cvtColor(adjusted, cv2.COLOR_BGR2RGB)
@@ -228,8 +230,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                     if i == len(xcoord)-1:
                         self.track_TE.append("Detection on frame: %d" % count)
                         
-                
-
             
             cv2.namedWindow("Background removed", cv2.WINDOW_NORMAL) 
             cv2.imshow("Background removed",currentframe)               
@@ -239,10 +239,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             #variables used to increase/decrease video playback speed
             self.vidSpeedMultiplier=int(self.playbackSlider.value())
             self.framerate=float(self.framerate)
-            a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
+#            a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
             
             
-            time.sleep(a)
+#            time.sleep(a)
                 #breaks out 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.trkTrack_B.setChecked(False)
@@ -461,6 +461,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
+        self.track_TE.append("Threshold contour area changed to %d" % self.cntareathreshold)
 
 class PandasModel(QtCore.QAbstractTableModel):
     """

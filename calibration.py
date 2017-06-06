@@ -26,6 +26,7 @@ class Calibration:
 
 
     def doCalibration(self,rectify):
+        self.cal_TE.append("Calibration window open:")
         self.rectify=rectify
         
         self.video=str(self.fullpath)
@@ -57,18 +58,14 @@ class Calibration:
                 iy=y
                 self.xdist.append(ix)
                 self.ydist.append(iy)
-        def showWindows():
+                self.cal_TE.append("Point %d chosen with x-pixel coordinates of %d and y-pixel coordinates of %d" % (self.count, ix, iy))
             
-            cv2.namedWindow('Calibration frame')
-            cv2.setMouseCallback('Calibration frame',draw_circle)
-            cv2.imshow('Calibration frame',firstFrame)
-            self.k = cv2.waitKey(1) & 0xFF
-            if self.k == ord('q'):
-                cv2.camera.release()
-                cv2.destroyAllwindows()
-                
+        cv2.namedWindow('Calibration frame')
+        cv2.setMouseCallback('Calibration frame',draw_circle)
+
         while self.count <= 3:
-            showWindows()
+            cv2.imshow('Calibration frame',firstFrame)
+
             if self.count==0:
                 cv2.putText(firstFrame, "1. Place first point (1)", (10, 20),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 label="Point 1"
@@ -83,7 +80,14 @@ class Calibration:
                 
             if self.count==3:
                 cv2.putText(firstFrame, "Exit pop-up and enter parameters ...", (10, 80),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                
+            self.k = cv2.waitKey(1) & 0xFF
+            if self.k == ord('q'):
+                self.cal_TE.append("Enter calibration parameters and then click output calibration")
+                cv2.camera.release()
+                cv2.destroyAllwindows()
 
+                
          
     def perspectiveTransform(self):
 
@@ -178,10 +182,10 @@ class Calibration:
         
         self.seperation = distance2pnts
         self.distance = refDistance
-        print self.xdist
+    
         deltax=float(self.seperation)/((self.xdist[0]-self.xdist[1])**2+(self.ydist[0]-self.ydist[1])**2)**0.5
         pixperdist=0.1/deltax
-        print "amde it past calculations"
+    
         self.cal_TE.append("O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist))
         self.cal_TE.append("Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(self.distance)+(self.xdist[2]-self.xdist[0])*deltax,float(self.distance)+(self.xdist[2]-self.xdist[1])*deltax))
         
@@ -192,7 +196,6 @@ class Calibration:
         f.write(str(self.distance)+'\n')
         f.write(str(self.xdist[2])+'\n')
         f.write(str(self.ydist[2])+'\n')
-        f.write(str(self.M)+'\n')
         f.close()
         
         np.savetxt('%s/Calibration_files/%d_matrix.csv' %(self.path,float(self.cameraID)), self.M, delimiter=',')
