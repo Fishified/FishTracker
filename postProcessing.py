@@ -11,165 +11,114 @@ from PyQt4 import QtCore
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+from glob import glob
 
         
 class postProcessing:
     
-    def __init__(self,name,ppfileobj,pp_TV,ppFileLoaded_L,plot_L,calfile,origFlag,framerate,refpppath):
+    def __init__(self,fileobj,framerate):
         
-        self.plot_L=plot_L
-        self.name=name
-        self.ppfileobj=ppfileobj
-        self.pp_TV=pp_TV
-        self.ppFileLoaded_L=ppFileLoaded_L
-        self.origFlag=origFlag
-        self.loadedFlag=0
+        self.fileobj=fileobj
         self.framerate=framerate
-        self.pdCSVfile=pd.read_csv(self.ppfileobj)
-        self.calfile=calfile
-        self.pppath=refpppath
-        
+        self.df=pd.read_csv(self.fileobj)
+        self.path, self.filename=os.path.split(os.path.abspath(self.fileobj))
+        self.cameraid=self.filename[0:2]
+        self.name="Camera_%s" % self.cameraid
+
+        for name in glob("%s\Calibration_files\*" % self.path):
+            if name == "%s\Calibration_files\\%s.cal" % (self.path,self.cameraid):
+                self.calfile = name
         with open(self.calfile) as f:
             self.calcontent = f.readlines()
-  
-        if origFlag == 0:
 
-            self.cameraid=self.name[0:2]
-            self.pdCSVfile.columns= ['Image frame', 'x_px','y_px']
-            self.pdCSVfile=self.pdCSVfile.replace('0.0', np.nan)
-            
-            #add georeferenced coordinates
-            self.pdCSVfile['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.pdCSVfile['x_px'])*float(self.calcontent[2])
-            self.pdCSVfile['y']=(float(self.calcontent[5])-self.pdCSVfile['y_px'])*float(self.calcontent[2])
-            self.pdCSVfile.to_csv('%s\\%s_orig.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
-            self.pdCSVfile.to_csv('%s\\%s_treated.csv' %(self.pppath,self.cameraid),index_label=False,sep=',')
-            self.treated=self.pdCSVfile
-            self.kinematics()
-           
-        if origFlag == 1:
-            self.pdCSVfile.to_csv('%s\Stitch_orig.csv'%self.pppath, index_label=False,sep=',')
-            
-            self.treated=self.pdCSVfile
-            self.kinematics()
-            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
-            self.treated.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
-
-    def show(self,state):
-
-                  
-        #show after undoing changes
-        if state == 2:
-            if self.name == "Stitch":              
-                self.treated = pd.read_csv("%s\Stitch_orig.csv" %self.pppath,sep =',')
-                self.kinematics()
-                self.treated.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
-            else:
-                
-                self.treated = pd.read_csv("%s\%s_orig.csv" % (self.pppath, self.cameraid),sep =',')
-                self.kinematics()
- 
-
-        self.ppFileLoaded_L.setText("%s\%s.csv" % (self.pppath, self.name))      
+        self.df.columns= ['Image frame', 'x_px','y_px']
+        self.df=self.df.replace('0.0', np.nan)
         
-        if 'Interpolated' in self.treated.columns:
-            
-            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
-            
-            
-        else:
-            
-            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
-            
-#            try: self.cameraid
-#            except NameError:
-#                print "False"
-#                self.treated.to_csv('%s\Stitch_treated.csv' % self.pppath, index_label=False,sep=',')
-#            else:
-#                print "True"
-#                self.treated.to_csv('%s\%s_treated.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
-#            
-            
-        self.pp_TV.setModel(PandasModel(self.treated))
-#        self.pp_TV.setAlternatingRowColors(True)
-#       se.setStyleSheet("alternate-background-color: yellow; background-color: red;")
-        ax=self.treated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
+        self.df['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.df['x_px'])*float(self.calcontent[2])
+        self.df['y']=(float(self.calcontent[5])-self.df['y_px'])*float(self.calcontent[2])
         
-        self.treated.plot(kind='scatter', x='down', y='y',ax=ax,color='Blue')
+        self.defineDataFrame()
         
-        if 'Interpolated' in self.treated.columns:
-            self.treated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow')
-            
+    def defineDataFrame(self):
+        
+        self.dfTreated=self.df
+        self.kinematics()
+        
+        try:
+            self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
+        except AttributeError:
+            pass
+          
+    def plotTrack(self,tableView,textLabel,plotLabel):
+        
+        self.textLabel=textLabel
+        self.tableView=tableView
+        self.plotLabel=plotLabel
+        self.textLabel.setText("%s\%s.csv" % (self.path, self.name))      
+        self.tableView.setModel(PandasModel(self.dfTreated))
+        
+        ax=self.dfTreated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
+        self.dfTreated.plot(kind='scatter', x='down', y='y',ax=ax,color='Blue')
+        
+        if 'Interpolated' in self.dfTreated.columns:
+            self.dfTreated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow') 
         fig = ax.get_figure()
-        fig.savefig('%s\%s.png' % (self.pppath,self.name))
-        
-        self.plot_L.setPixmap(QPixmap("%s\%s.png" % (self.pppath,self.name)))
-        self.loadedFlag=1
+        fig.savefig('%s\%s.png' % (self.path,self.name))
+        self.plotLabel.setPixmap(QPixmap("%s\%s.png" % (self.path,self.name)))
     
-    def blank(self,rowIndices):
+    def blankRows(self,rowIndices):
         
         self.rowIndices=rowIndices
-        
         for i in range(len(self.rowIndices)):
-            self.treated.iloc[self.rowIndices[i].row(),1:10]=None
-                              
-        if self.name == "Stitch":
-            self.treated.to_csv("%s\Stitch_treated.csv" %self.pppath,sep =',')
-        else :
-            self.treated.to_csv("%s\%s_treated.csv" % (self.pppath,self.cameraid),sep =',')
-
-        self.show(0)
+            self.dfTreated.iloc[self.rowIndices[i].row(),1:10]=None              
+        self.dfTreated.to_csv("%s\%s_dfTreated.csv" % (self.path,self.cameraid),sep =',')
+        self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         
-    def ppAdjust(self,adjust,state):
-        #
+    def shiftFrames(self,adjust,state):
+        
         self.state=state
         self.adjust=int(adjust)
 
         if state == 1:
             df = pd.DataFrame(index=range(0,self.adjust),columns=['Image frame','x_px','y_px','x','y','u','v','up','down'], dtype='float')
-            
-            self.treated= pd.concat([df,self.treated])
-            self.treated=self.treated.reset_index(drop=True)
-            self.treated['Image frame'] = self.treated.index
+            self.dfTreated= pd.concat([df,self.dfTreated])
+            self.dfTreated=self.dfTreated.reset_index(drop=True)
+            self.dfTreated['Image frame'] = self.dfTreated.index
 
         if state == 0:
+            self.dfTreated = self.dfTreated.ix[self.adjust:]
+            self.dfTreated=self.dfTreated.reset_index(drop=True)
+            self.dfTreated['Image frame'] = self.dfTreated.index
             
-            self.treated = self.treated.ix[self.adjust:]
-            self.treated=self.treated.reset_index(drop=True)
-            self.treated['Image frame'] = self.treated.index
-            
-        self.treated.to_csv("%s\%s_treated.csv" % (self.pppath,self.cameraid),index_label=False,sep =',')
-        self.show(1)
+        self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         
-    def ppInterpolate(self):
-        self.treated=self.treated.drop(['u','v','up','down'],axis=1)
+    def interpolate(self):
         
-        self.treated["Interpolated"]=0
-        self.treated.ix[self.treated['x'].isnull(),'Interpolated']=1
-        self.treated=self.treated.interpolate() 
-
-        self.treated['Interpolated_x'] = np.where(self.treated['Interpolated'] == 1, self.treated['x'],None)
+        self.dfTreated=self.dfTreated.drop(['u','v','up','down'],axis=1)
+        self.dfTreated["Interpolated"]=0
+        self.dfTreated.ix[self.dfTreated['x'].isnull(),'Interpolated']=1
+        self.dfTreated=self.dfTreated.interpolate() 
+        self.dfTreated['Interpolated_x'] = np.where(self.dfTreated['Interpolated'] == 1, self.dfTreated['x'],None)
         self.kinematics()
-        self.show(0)
+        self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
 
     def kinematics(self):
         
-        self.treated['u']=self.treated.x.diff()*self.framerate
-        self.treated['v']=self.treated.y.diff()*self.framerate
+        self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
+        self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
+        self.dfTreated['up']=self.dfTreated['x']
+        self.dfTreated['down']=self.dfTreated['x']
+        self.dfTreated.ix[(self.dfTreated['u']<0),'up']=None
+        self.dfTreated.ix[(self.dfTreated['u']>=0),'down']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'down']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up']=None
         
-        self.treated['up']=self.treated['x']
-        self.treated['down']=self.treated['x']
-    
-        self.treated.ix[(self.treated['u']<0),'up']=None
-        self.treated.ix[(self.treated['u']>=0),'down']=None
-        self.treated.ix[self.treated['u'].isnull(),'down']=None
-        self.treated.ix[self.treated['u'].isnull(),'up']=None
-                        
-    def errorRemoval(self):
-        
-        pass
-        
-        
-        
+        if 'Interpolated' in self.dfTreated.columns:
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
+        else:
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+
 class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe

@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -1866,7 +1866,7 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_29">
                <item row="0" column="0">
-                <widget class="QLabel" name="plot_L">
+                <widget class="QLabel" name="trackPlot_L">
                  <property name="text">
                   <string>Trace will appear when a trajectory file is selected ...</string>
                  </property>

@@ -35,12 +35,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppAdjustState=1
         self.framerate=int(self.trkFramerate_LE.text())
         
-        #lists
+        #global lists
         self.cameralist=[]
         self.ppnamelist=[]
         self.ppClasslist=[]
         self.calfile=[]
-        self.simplelist=[]
+        self.trackList=[]
         self.master_calList=[]
         
         #calibrate/setup
@@ -66,17 +66,17 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.kernelSlider.valueChanged.connect(self.kernelSliderChange)
         
         #post-process
-        self.ppFileOpen_B.clicked.connect(self.pp_openCSV)
+        self.ppFileOpen_B.clicked.connect(self.openCSV)
         self.ppClean_B.clicked.connect(self.cleanup)
-        self.ppBlank_B.clicked.connect(self.ppBlank)
-        self.ppUndo_B.clicked.connect(self.ppUndo)
+        self.ppBlank_B.clicked.connect(self.blankRows)
+        self.ppUndo_B.clicked.connect(self.changesUndo)
         self.ppStitch_B.clicked.connect(self.ppStitch)
-        self.ppAdjust_B.clicked.connect(self.ppAdjust)
+        self.ppAdjust_B.clicked.connect(self.shiftFrames)
         self.ppHorizontalCombine_B.clicked.connect(self.pphorizontalCombine)
-        self.ppInterpolate_B.clicked.connect(self.ppInterpolate)
+        self.ppInterpolate_B.clicked.connect(self.interpolate)
         self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
         self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
-        self.csvList_LW.currentItemChanged.connect(self.ppShow)
+        self.csvList_LW.currentItemChanged.connect(self.plotTrack)
 
     def populatecameralist(self):
         self.cameralist.append(self.populatecameraslineEdit.text())
@@ -256,7 +256,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.fishcoords=np.transpose(self.fishcoords)
         self.fishcoords=pd.DataFrame(self.fishcoords)
-        self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraid))
+        self.fishcoords.to_csv("%s\\%s_raw.trk" %(self.path,self.cameraid))
        
         
     def open(self):
@@ -265,8 +265,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
-        
-        
+           
     def preview(self):
         
         self.tracking.preview() 
@@ -330,35 +329,23 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     """
     post-processing
     """
-    def pp_openCSV(self):
-        self.ppnamelist=[]
-        self.ppfileobj=[]
-        self.calfile=[]
-        
-        self.ppfileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.csv)")
-       
-        for i in range(len(self.ppfileobj)):
-            self.pppath, self.ppfilename=os.path.split(os.path.abspath(self.ppfileobj[i]))
-            slicestr=self.ppfilename[0:6]
-            self.cameraid=self.ppfilename[0:2]
-            self.ppnamelist.append(slicestr)
-            self.csvList_LW.addItem(self.ppnamelist[i])
+    def openCSV(self):
 
-            for name in glob("%s\Calibration_files\*" % self.path):
-                a="%s\Calibration_files\\%s.cal" % (self.path,self.cameraid)
-                if name == a:
-                    self.calfile.append(name)
-        
-        self.newlist=[postProcessing.postProcessing(self.ppnamelist[i],self.ppfileobj[i],self.pp_TV,self.ppFileLoaded_L,self.plot_L,self.calfile[i],0,self.framerate,self.path) for i in range(len(self.ppnamelist))]
-       
-        if len(self.simplelist) == 0:
-            self.simplelist=self.newlist
+        self.fileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.trk)")
+        self.appendTrackList=[postProcessing.postProcessing(self.fileobj[i],self.framerate) for i in range(len(self.fileobj))]
+
+        if len(self.trackList) == 0:
+            self.trackList=self.appendTrackList
         else:
-            self.simplelist=self.simplelist+self.newlist
+            self.trackList=self.trackList+self.appendTrackList
             
-    def ppShow(self):
+        for i in range(len(self.trackList)):
+            self.csvList_LW.addItem(self.trackList[i].name)
+        
+        
+    def plotTrack(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].show(0)
+        self.trackList[listindex].plotTrack(self.pp_TV,self.ppFileLoaded_L,self.trackPlot_L)
         
     def ppStitch(self):
         self.csvList_LW.clear()
@@ -403,13 +390,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         f.write("Dummy calibration file for stitch")
         f.close()
 
-    def ppBlank(self):
+    def blankRows(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].blank(self.pp_TV.selectionModel().selectedRows())
+        self.trackList[listindex].blankRows(self.pp_TV.selectionModel().selectedRows())
         
-    def ppUndo(self):
+    def changesUndo(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].show(2)
+        self.trackList[listindex].defineDataFrame()
         
     def pphorizontalCombine(self):
         self.ppPopulateStitchList()
@@ -426,13 +413,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
          if b.isChecked() == True:
             self.ppAdjustState=0
     
-    def ppAdjust(self):
+    def shiftFrames(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].ppAdjust(self.ppAdjust_LE.text(),self.ppAdjustState)
+        self.trackList[listindex].shiftFrames(self.ppAdjust_LE.text(),self.ppAdjustState)
         
-    def ppInterpolate(self):
+    def interpolate(self):
         listindex = self.csvList_LW.currentRow()
-        self.simplelist[listindex].ppInterpolate()
+        self.trackList[listindex].interpolate()
         
     #utilities
     def getPath(self):
@@ -456,8 +443,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             except WindowsError:
                 copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
                 
-
-       
     def cleanup(self):
         self.pwd=os.getcwd()
         for fl in glob("%s\\*_orig.csv" %self.path):
