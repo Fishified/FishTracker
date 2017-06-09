@@ -48,40 +48,51 @@ class postProcessing:
            
         if origFlag == 1:
             self.pdCSVfile.to_csv('%s\Stitch_orig.csv'%self.pppath, index_label=False,sep=',')
-            self.pdCSVfile.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
+            
             self.treated=self.pdCSVfile
             self.kinematics()
+            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+            self.treated.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
 
     def show(self,state):
 
                   
         #show after undoing changes
         if state == 2:
-            if self.name == "Stitch":
-                print "hi in state"
+            if self.name == "Stitch":              
                 self.treated = pd.read_csv("%s\Stitch_orig.csv" %self.pppath,sep =',')
                 self.kinematics()
-                print "made it past kinematics"
                 self.treated.to_csv('%s\Stitch_treated.csv'%self.pppath,index_label=False,sep=',')
-                print "made it threw state"
-              
             else:
+                
                 self.treated = pd.read_csv("%s\%s_orig.csv" % (self.pppath, self.cameraid),sep =',')
-                self.treated.to_csv('%s\%s_treated.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
                 self.kinematics()
+ 
 
         self.ppFileLoaded_L.setText("%s\%s.csv" % (self.pppath, self.name))      
         
         if 'Interpolated' in self.treated.columns:
-            print "hi in interpolation"
+            
             self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
             
+            
         else:
-            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]        
-        
+            
+            self.treated = self.treated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+            
+#            try: self.cameraid
+#            except NameError:
+#                print "False"
+#                self.treated.to_csv('%s\Stitch_treated.csv' % self.pppath, index_label=False,sep=',')
+#            else:
+#                print "True"
+#                self.treated.to_csv('%s\%s_treated.csv' % (self.pppath, self.cameraid),index_label=False,sep=',')
+#            
+            
         self.pp_TV.setModel(PandasModel(self.treated))
-       
-        ax=self.treated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.635],color='Red',figsize=(10,2))
+#        self.pp_TV.setAlternatingRowColors(True)
+#       se.setStyleSheet("alternate-background-color: yellow; background-color: red;")
+        ax=self.treated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
         
         self.treated.plot(kind='scatter', x='down', y='y',ax=ax,color='Blue')
         
@@ -152,6 +163,12 @@ class postProcessing:
         self.treated.ix[(self.treated['u']>=0),'down']=None
         self.treated.ix[self.treated['u'].isnull(),'down']=None
         self.treated.ix[self.treated['u'].isnull(),'up']=None
+                        
+    def errorRemoval(self):
+        
+        pass
+        
+        
         
 class PandasModel(QtCore.QAbstractTableModel):
     """

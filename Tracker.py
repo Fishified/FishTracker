@@ -50,6 +50,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calCalibrate_B.clicked.connect(self.doCalibration)
         self.calRectify_B.clicked.connect(self.doRectify)
         self.calChoseExisting_B.clicked.connect(self.openCalibration)
+
+    
 #        self.cal_LW.currentItemChanged.connect(self.calActivate)
         
         #track
@@ -91,9 +93,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def play_movie(self):
         
         self.framerate=int(self.trkFramerate_LE.text())
-        self.cameraID=int(self.cameraIdLineEdit.text())
         self.pathThrow, self.filename=os.path.split(os.path.abspath(self.video))
-        print "hi"
+        
         self.cameraid=self.filename[0:2]
         transfoMat=0
         if self.trackRectify_CB.isChecked():
@@ -239,10 +240,10 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             #variables used to increase/decrease video playback speed
             self.vidSpeedMultiplier=int(self.playbackSlider.value())
             self.framerate=float(self.framerate)
-#            a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
+            a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
             
             
-#            time.sleep(a)
+            time.sleep(a)
                 #breaks out 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.trkTrack_B.setChecked(False)
@@ -255,12 +256,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.fishcoords=np.transpose(self.fishcoords)
         self.fishcoords=pd.DataFrame(self.fishcoords)
-        self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraID))
+        self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraid))
        
         
     def open(self):
 
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files (*.mp4)")
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.h264")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
@@ -276,7 +277,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
     def openCalibration(self):
         self.calpath=QFileDialog.getExistingDirectory(self)
-        
         try:
             os.makedirs('%s\\Calibration_files' % self.path)
         except WindowsError:
@@ -284,7 +284,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         dest="%s\\Calibration_files\\" % self.path
         copy_tree("%s\\" % self.calpath, "%s\\Calibration_files\\" % self.path)
-
+        
     def doCalibration(self):
         if self.calRectify_CB.isChecked()==True:
             self.rectify=True
@@ -319,7 +319,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         else:
             self.master_calList=self.master_calList+self.toAppend_calList
         
- 
     def doRectify(self):
         listindex = self.cal_LW.currentRow()
         self.master_calList[listindex].perspectiveTransform()
@@ -437,10 +436,28 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     #utilities
     def getPath(self):
-        self.path=QFileDialog.getExistingDirectory(self)
+        
+        try:
+            self.lastpath=self.path
+        except AttributeError:
+            pass
+        
+        try:
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.path)
+        except AttributeError:
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "G:\\CutVideo\\")
+              
         self.calLabelPath_L.setText(self.path)
         self.activePath_L.setText(self.path)
         
+        if self.calReuse_CB.isChecked()==True:
+            try:
+                os.makedirs('%s\\Calibration_files' % self.path)
+            except WindowsError:
+                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
+                
+
+       
     def cleanup(self):
         self.pwd=os.getcwd()
         for fl in glob("%s\\*_orig.csv" %self.path):
