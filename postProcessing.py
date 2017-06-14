@@ -33,7 +33,7 @@ class postProcessing:
             self.calcontent = f.readlines()
 
         self.df.columns= ['Image frame', 'x_px','y_px']
-        self.df=self.df.replace('0.0', np.nan)
+        self.df=self.df.replace(0.0, np.nan)
         
         self.df['x']=float(self.calcontent[3])+(float(self.calcontent[4])-self.df['x_px'])*float(self.calcontent[2])
         self.df['y']=(float(self.calcontent[5])-self.df['y_px'])*float(self.calcontent[2])
@@ -54,6 +54,7 @@ class postProcessing:
     def kinematics(self):
         
         self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
+        
         self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
         self.dfTreated['up']=self.dfTreated['x']
         self.dfTreated['down']=self.dfTreated['x']
@@ -61,12 +62,12 @@ class postProcessing:
         self.dfTreated.ix[(self.dfTreated['u']>=0),'down']=None
         self.dfTreated.ix[self.dfTreated['u'].isnull(),'down']=None
         self.dfTreated.ix[self.dfTreated['u'].isnull(),'up']=None
-        
+       
         if 'Interpolated' in self.dfTreated.columns:
             self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
         else:
             self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
-
+        
     def plotTrack(self,tableView,textLabel,plotLabel):
         
         self.textLabel=textLabel
@@ -89,7 +90,6 @@ class postProcessing:
         self.rowIndices=rowIndices
         for i in range(len(self.rowIndices)):
             self.dfTreated.iloc[self.rowIndices[i].row(),1:10]=None              
-        #self.dfTreated.to_csv("%s\%s_dfTreated.csv" % (self.path,self.cameraid),sep =',')
         self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         
     def shiftFrames(self,adjust,state):

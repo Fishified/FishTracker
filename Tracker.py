@@ -139,10 +139,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 
                 self.trkTrack_B.setChecked(False)
                 self.trkTrack_B.setText('Play')
-                self.track_TE.append("Tracking complete.")
+                self.track_TE.append("Tracking complete!")
                 break
+            
             originalframe=frame
             rows,cols,ch = frame.shape
+            
             if transfoMat==1:
                 adjusted=cv2.warpAffine(frame,transMatrix,(cols,rows))
                 currentframe = cv2.cvtColor(adjusted, cv2.COLOR_BGR2RGB)
@@ -198,7 +200,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             xcntcoord=[0]
             ycntcoord=[0]
             for c in cnts:
-                if cv2.contourArea(c) < cntareathreshold:# Defense 1
+                if cv2.contourArea(c) < cntareathreshold:
                     continue
                 cntarea.append(cv2.contourArea(c))
                 (x, y, w, h) = cv2.boundingRect(c)
@@ -209,7 +211,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
-                self.track_TE.append(str(cv2.contourArea(c)))
+                self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
         
             biggestcontour=cntarea.index(max(cntarea))
             xcoord.append(xcntcoord[biggestcontour])
@@ -255,12 +257,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.fishcoords=np.transpose(self.fishcoords)
         self.fishcoords=pd.DataFrame(self.fishcoords)
-        self.fishcoords.to_csv("%s\\%s_raw.trk" %(self.path,self.cameraid))
+        self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraid))
        
         
     def open(self):
 
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.h264")
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.mp4")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
@@ -330,7 +332,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     """
     def openCSV(self):
 
-        self.fileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.trk)")
+        self.fileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.csv)")
         self.appendTrackList=[postProcessing.postProcessing(self.fileobj[i],self.framerate) for i in range(len(self.fileobj))]
 
         if len(self.trackList) == 0:
