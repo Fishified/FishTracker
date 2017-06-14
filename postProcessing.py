@@ -44,12 +44,29 @@ class postProcessing:
         
         self.dfTreated=self.df
         self.kinematics()
+        self.write()
         
         try:
             self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         except AttributeError:
             pass
-          
+        
+    def kinematics(self):
+        
+        self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
+        self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
+        self.dfTreated['up']=self.dfTreated['x']
+        self.dfTreated['down']=self.dfTreated['x']
+        self.dfTreated.ix[(self.dfTreated['u']<0),'up']=None
+        self.dfTreated.ix[(self.dfTreated['u']>=0),'down']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'down']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up']=None
+        
+        if 'Interpolated' in self.dfTreated.columns:
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
+        else:
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+
     def plotTrack(self,tableView,textLabel,plotLabel):
         
         self.textLabel=textLabel
@@ -72,7 +89,7 @@ class postProcessing:
         self.rowIndices=rowIndices
         for i in range(len(self.rowIndices)):
             self.dfTreated.iloc[self.rowIndices[i].row(),1:10]=None              
-        self.dfTreated.to_csv("%s\%s_dfTreated.csv" % (self.path,self.cameraid),sep =',')
+        #self.dfTreated.to_csv("%s\%s_dfTreated.csv" % (self.path,self.cameraid),sep =',')
         self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         
     def shiftFrames(self,adjust,state):
@@ -103,21 +120,8 @@ class postProcessing:
         self.kinematics()
         self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
 
-    def kinematics(self):
-        
-        self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
-        self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
-        self.dfTreated['up']=self.dfTreated['x']
-        self.dfTreated['down']=self.dfTreated['x']
-        self.dfTreated.ix[(self.dfTreated['u']<0),'up']=None
-        self.dfTreated.ix[(self.dfTreated['u']>=0),'down']=None
-        self.dfTreated.ix[self.dfTreated['u'].isnull(),'down']=None
-        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up']=None
-        
-        if 'Interpolated' in self.dfTreated.columns:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
-        else:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+    def write(self):
+        self.dfTreated.to_csv("%s\%s_treated.csv" % (self.path,self.name),sep =',')
 
 class PandasModel(QtCore.QAbstractTableModel):
     """

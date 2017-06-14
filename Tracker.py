@@ -37,7 +37,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         #global lists
         self.cameralist=[]
-        self.ppnamelist=[]
         self.ppClasslist=[]
         self.calfile=[]
         self.trackList=[]
@@ -70,7 +69,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppClean_B.clicked.connect(self.cleanup)
         self.ppBlank_B.clicked.connect(self.blankRows)
         self.ppUndo_B.clicked.connect(self.changesUndo)
-        self.ppStitch_B.clicked.connect(self.ppStitch)
+        #self.ppStitch_B.clicked.connect(self.ppStitch)
         self.ppAdjust_B.clicked.connect(self.shiftFrames)
         self.ppHorizontalCombine_B.clicked.connect(self.pphorizontalCombine)
         self.ppInterpolate_B.clicked.connect(self.interpolate)
@@ -300,7 +299,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calCameraID=[]
         self.fullPath=[]
 
-        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Text Files (*.mp4)")
+        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.mp4)")
        
         for i in range(len(self.calFileobj)):
             self.pathThrow, self.calFilename=os.path.split(os.path.abspath(self.calFileobj[i]))
@@ -347,44 +346,13 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         listindex = self.csvList_LW.currentRow()
         self.trackList[listindex].plotTrack(self.pp_TV,self.ppFileLoaded_L,self.trackPlot_L)
         
-    def ppStitch(self):
-        self.csvList_LW.clear()
-        
-        for i in range(len(self.simplelist)):
-            if self.simplelist[i].name=="Stitch":
-                del self.simplelist[i]
-                
-        for i in range(len(self.simplelist)):
-            self.csvList_LW.addItem(self.simplelist[i].name)
-                
-        self.ppPopulateStitchList()
-        csvcombined=self.stitchlist[0]
-        
-        for i in range(len(self.stitchlist)):
-        	try:
-        		csvcombined=csvcombined.combine_first(self.stitchlist[i+1])
-        	except IndexError:
-        		break
-
-        csvcombined.to_csv("%s\stitch.csv" % self.path,index_label=False,sep=',')    
-        
-        stitchPPinstance= postProcessing.postProcessing("Stitch","%s\stitch.csv" % self.path,
-                                                        self.pp_TV,self.ppFileLoaded_L,
-                                                        self.plot_L,
-                                                        '%s\Calibration_files\stitch.cal' % self.path,
-                                                        1,
-                                                        self.framerate,self.path)
-        self.simplelist.append(stitchPPinstance)
-        self.csvList_LW.addItem( self.simplelist[-1].name)
-        self.simplelist[-1].show(0)
-
     def ppPopulateStitchList(self):
-        self.stitchlist=[]
+        self.trackList=[]
         for index in xrange(self.csvList_LW.count()):
             if self.csvList_LW.item(index).text()=="Stitch":
                 continue
-            filename="%s\%s_treated.csv" % (self.path,self.csvList_LW.item(index).text()[0:2])
-            self.stitchlist.append(pd.read_csv('%s' % (filename)))
+            filename="%s\%s_treated.csv" % (self.path,self.csvList_LW.item(index).text())
+            self.trackList.append(pd.read_csv('%s' % (filename)))
     
         f = open('%s\\Calibration_files\stitch.cal' % self.path, 'w+')
         f.write("Dummy calibration file for stitch")
@@ -400,7 +368,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def pphorizontalCombine(self):
         self.ppPopulateStitchList()
-        self.horizontalStack = pd.concat(self.stitchlist, axis=1)
+        self.horizontalStack = pd.concat(self.trackList, axis=1)
         self.pp_TV.setModel(PandasModel(self.horizontalStack))
         
     def ppRBstate(self,b):
@@ -444,7 +412,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
                 
     def cleanup(self):
-        self.pwd=os.getcwd()
+        #self.pwd=os.getcwd()
         for fl in glob("%s\\*_orig.csv" %self.path):
             os.remove(fl)
         for fl in glob("%s\\*_treated.csv" %self.path):
@@ -454,12 +422,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         for fl in glob("%s\\*.png" %self.path):
             os.remove(fl)
         
-        del self.simplelist[:]
-        self.ppnamelist=[]
+        self.pp_TV.clearSpans()
+        del self.trackList[:]
         self.csvList_LW.clear()
         self.ppFileLoaded_L.clear()
-        self.plot_L.setText("Trace will appear when a trajectory file is selected ...")
-        self.pp_TV.clearSpans()
+        self.trackPlot_L.setText("Trace will appear when a trajectory file is selected ...")
+
         
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
