@@ -56,17 +56,17 @@ class postProcessing:
         self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
         
         self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
-        self.dfTreated['up']=self.dfTreated['x']
-        self.dfTreated['down']=self.dfTreated['x']
-        self.dfTreated.ix[(self.dfTreated['u']<0),'up']=None
-        self.dfTreated.ix[(self.dfTreated['u']>=0),'down']=None
-        self.dfTreated.ix[self.dfTreated['u'].isnull(),'down']=None
-        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up']=None
+        self.dfTreated['up_x']=self.dfTreated['x']
+        self.dfTreated['down_x']=self.dfTreated['x']
+        self.dfTreated.ix[(self.dfTreated['u']<0),'up_x']=None
+        self.dfTreated.ix[(self.dfTreated['u']>=0),'down_x']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'down_x']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up-X']=None
        
         if 'Interpolated' in self.dfTreated.columns:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down','Interpolated','Interpolated_x']]
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x','Interpolated','Interpolated_x']]
         else:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up','down']]
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x']]
         
     def plotTrack(self,tableView,textLabel,plotLabel):
         
@@ -76,8 +76,8 @@ class postProcessing:
         self.textLabel.setText("%s\%s.csv" % (self.path, self.name))      
         self.tableView.setModel(PandasModel(self.dfTreated))
         
-        ax=self.dfTreated.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
-        self.dfTreated.plot(kind='scatter', x='down', y='y',ax=ax,color='Blue')
+        ax=self.dfTreated.plot(x='up_x',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
+        self.dfTreated.plot(kind='scatter', x='down_x', y='y',ax=ax,color='Blue')
         
         if 'Interpolated' in self.dfTreated.columns:
             self.dfTreated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow') 

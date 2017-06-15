@@ -20,6 +20,7 @@ import tracker_ui
 import calibration
 import postProcessing
 import videoTracking
+import stitchPlot
 
 
 from PyQt4 import QtGui
@@ -74,14 +75,14 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppClean_B.clicked.connect(self.cleanup)
         self.ppBlank_B.clicked.connect(self.blankRows)
         self.ppUndo_B.clicked.connect(self.changesUndo)
-        #self.ppStitch_B.clicked.connect(self.ppStitch)
+        self.ppStitch_B.clicked.connect(self.stitchPlot)
         self.ppAdjust_B.clicked.connect(self.shiftFrames)
         self.ppHorizontalCombine_B.clicked.connect(self.pphorizontalCombine)
         self.ppInterpolate_B.clicked.connect(self.interpolate)
         self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
         self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
         self.csvList_LW.currentItemChanged.connect(self.plotTrack)
-        self.csvList_LW.currentItemChanged.connect(self.update_graph)
+        #self.csvList_LW.currentItemChanged.connect(self.update_graph)
 
     def populatecameralist(self):
         self.cameralist.append(self.populatecameraslineEdit.text())
@@ -185,6 +186,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 currentframe = cv2.erode(currentframe,kernel,iterations=1)
             if self.dilateCheckbox.isChecked() == True:
                 currentframe = cv2.dilate(currentframe,kernel,iterations=1)
+                
+
 
             #pass Gaussian filter
             if self.gaussCheckBox.isChecked() == True:
@@ -205,6 +208,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             cntarea=[0]
             xcntcoord=[0]
             ycntcoord=[0]
+            
             for c in cnts:
                 if cv2.contourArea(c) < cntareathreshold:
                     continue
@@ -218,15 +222,34 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
                 self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
-        
-            biggestcontour=cntarea.index(max(cntarea))
-            xcoord.append(xcntcoord[biggestcontour])
-            ycoord.append(ycntcoord[biggestcontour])
+#                self.track_TE.append("x position : %d" % float(xcntcoord[-1]))
+#                self.track_TE.append("y position : %d" % float(ycntcoord[-1]))
             
-            if xcntcoord[biggestcontour]==0:
-                pass
+            if self.splitCorrect_CB.isChecked() == True and len(xcntcoord)>2:
+                del xcntcoord[0]
+                del ycntcoord[0]
+                
+                xcoordCorrected=sum(xcntcoord)/len(xcntcoord)
+                ycoordCorrected=sum(ycntcoord)/len(ycntcoord)
+                xcoord.append(xcoordCorrected)
+                ycoord.append(ycoordCorrected)
+                self.track_TE.append("Split correction applied: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
+                self.track_TE.append("Contour 1: x-coord %d, y-coord %d" % (xcntcoord[0], ycntcoord[0]))
+                self.track_TE.append("Contour 2: x-coord %d, y-coord %d" % (xcntcoord[1], ycntcoord[1]))
+                
+                
             else:
-                cv2.circle(originalframe, (xcntcoord[biggestcontour], ycntcoord[biggestcontour]),r,(0, 255, 0), 3)
+
+                biggestcontour=cntarea.index(max(cntarea))
+                xcoord.append(xcntcoord[biggestcontour])
+                ycoord.append(ycntcoord[biggestcontour])
+                self.track_TE.append("Single detection: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
+
+#            
+#            if xcntcoord[biggestcontour]==0 or passFlag==True :
+#                pass
+#            else:
+#                cv2.circle(originalframe, (xcoord[-1], ycoord[-1]),r,(0, 255, 0), 3)
                 
             self.fishcoords=np.array((xcoord,ycoord),dtype=float) 
              
@@ -267,8 +290,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
        
         
     def open(self):
+    
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.h264")
 
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.mp4")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
@@ -307,7 +331,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calCameraID=[]
         self.fullPath=[]
 
-        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.mp4)")
+        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.h264)")
        
         for i in range(len(self.calFileobj)):
             self.pathThrow, self.calFilename=os.path.split(os.path.abspath(self.calFileobj[i]))
@@ -351,8 +375,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         
     def plotTrack(self):
-        listindex = self.csvList_LW.currentRow()
-        self.trackList[listindex].plotTrack(self.pp_TV,self.ppFileLoaded_L,self.trackPlot_L)
+        try:
+            listindex = self.csvList_LW.currentRow()
+            self.trackList[listindex].plotTrack(self.pp_TV,self.ppFileLoaded_L,self.trackPlot_L)
+
+        except IndexError:
+            pass
+
+        
+    def stitchPlot(self):
+        stitchPlot.stitchPlot(self.trackList)
+        
+        self.stitchPlot_L.setPixmap(QPixmap("%s\stitchPlot.png" %self.path))
         
     def ppPopulateStitchList(self):
         self.trackList=[]
@@ -402,20 +436,27 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         try:
             self.lastpath=self.path
-        except AttributeError:
-            pass
-        
-        try:
-            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.path)
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.lastpath)
+            check=True
+            
         except AttributeError:
             self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "G:\\CutVideo\\")
-              
+            check=False
+            
+#        if check==True:
+#            choice = QtGui.QMessageBox.question(self, "This will change project folders ...","Are you sure?",QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+#                    if choice == QtGui.QMessageBox.Yes:
+#                        print("Okay, project folder changed")
+#                        sys.exit()
+#                    else:
+                        
         self.calLabelPath_L.setText(self.path)
         self.activePath_L.setText(self.path)
         
         if self.calReuse_CB.isChecked()==True:
             try:
                 os.makedirs('%s\\Calibration_files' % self.path)
+                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
             except WindowsError:
                 copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
                 
@@ -450,16 +491,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         df.columns= ['Image frame', 'x_px','y_px']
         self.mpl.canvas.ax.clear()
         
-        
-        self.mpl.canvas(df.plot(x='x_px',y='y_px',kind='scatter',color='Red',figsize=(10,2)))
-
-        #ax=df.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
-        #self.mpl.canvas.ax.bar(5, [20,33,25,99,100], width=0.5)
-        #self.mpl.canvas.ax.scatter(df.plot(x='x_px',y='y_px',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2)))
-        #self.mpl.canvas.ax.set_xlim(xmin=0, xmax=8)
-        #self.mpl.canvas.ax.set_xticks(range(len(l)))
-        #self.mpl.canvas.ax.set_xticklabels(l)
-        #self.mpl.canvas.ax.get_yaxis().grid(True)
+        self.mpl.canvas.ax.bar(5, [20,33,25,99,100], width=0.5)
         self.mpl.canvas.draw()
 
 class PandasModel(QtCore.QAbstractTableModel):

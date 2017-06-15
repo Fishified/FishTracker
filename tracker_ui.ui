@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -861,6 +861,9 @@
                     </item>
                     <item row="1" column="0">
                      <widget class="QPushButton" name="trkPreview_B">
+                      <property name="toolTip">
+                       <string>HI</string>
+                      </property>
                       <property name="text">
                        <string>Fast Preview</string>
                       </property>
@@ -947,6 +950,32 @@
                   </widget>
                  </item>
                  <item row="3" column="1">
+                  <widget class="QGroupBox" name="groupBox_18">
+                   <property name="title">
+                    <string>GroupBox</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_26">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_11">
+                      <property name="text">
+                       <string>Enter x position \</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QCheckBox" name="splitCorrect_CB">
+                   <property name="text">
+                    <string>Correct for split detections</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
                   <widget class="QPushButton" name="trkTrack_B">
                    <property name="toolTip">
                     <string>Starts object tracking on currently loaded video.</string>
@@ -959,10 +988,10 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1">
+                 <item row="8" column="1">
                   <widget class="QTextBrowser" name="track_TE"/>
                  </item>
-                 <item row="4" column="1">
+                 <item row="6" column="1">
                   <widget class="QLabel" name="label_control_Playback">
                    <property name="text">
                     <string>Control video playback speed:</string>
@@ -985,14 +1014,14 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="1">
+                 <item row="9" column="1">
                   <widget class="QLabel" name="label_21">
                    <property name="text">
                     <string>Help box:</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="1">
+                 <item row="7" column="1">
                   <widget class="QSlider" name="playbackSlider">
                    <property name="toolTip">
                     <string>Speed up or slow down video</string>
@@ -1014,13 +1043,13 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1">
+                 <item row="4" column="1">
                   <widget class="QCheckBox" name="trackRectify_CB">
                    <property name="text">
                     <string>Track on rectified video</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1035,6 +1064,9 @@
            <widget class="QGroupBox" name="groupBox_4">
             <property name="title">
              <string>Video processing</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
             </property>
             <layout class="QGridLayout" name="gridLayout_6">
              <item row="0" column="0" colspan="2">
@@ -1485,7 +1517,7 @@
               <item row="4" column="0" colspan="2">
                <widget class="QTabWidget" name="tabWidget_3">
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <property name="usesScrollButtons">
                  <bool>false</bool>
@@ -1882,7 +1914,11 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_30">
                <item row="0" column="0">
-                <widget class="MplWidget" name="mpl" native="true"/>
+                <widget class="QLabel" name="stitchPlot_L">
+                 <property name="text">
+                  <string>TextLabel</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -1941,14 +1977,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MplWidget</class>
-   <extends>QWidget</extends>
-   <header>mplwidget</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -1962,8 +1990,8 @@
      <y>186</y>
     </hint>
     <hint type="destinationlabel">
-     <x>205</x>
-     <y>207</y>
+     <x>256</x>
+     <y>233</y>
     </hint>
    </hints>
   </connection>
@@ -1974,8 +2002,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>105</x>
-     <y>185</y>
+     <x>156</x>
+     <y>202</y>
     </hint>
     <hint type="destinationlabel">
      <x>51</x>
@@ -1990,12 +2018,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>371</y>
+     <x>210</x>
+     <y>404</y>
     </hint>
     <hint type="destinationlabel">
-     <x>191</x>
-     <y>400</y>
+     <x>231</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
@@ -2010,8 +2038,8 @@
      <y>187</y>
     </hint>
     <hint type="destinationlabel">
-     <x>159</x>
-     <y>206</y>
+     <x>210</x>
+     <y>233</y>
     </hint>
    </hints>
   </connection>
@@ -2022,12 +2050,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>351</x>
-     <y>194</y>
+     <x>281</x>
+     <y>202</y>
     </hint>
     <hint type="destinationlabel">
-     <x>389</x>
-     <y>442</y>
+     <x>430</x>
+     <y>609</y>
     </hint>
    </hints>
   </connection>
@@ -2038,8 +2066,8 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>785</x>
-     <y>607</y>
+     <x>1009</x>
+     <y>654</y>
     </hint>
     <hint type="destinationlabel">
      <x>825</x>
@@ -2058,8 +2086,8 @@
      <y>111</y>
     </hint>
     <hint type="destinationlabel">
-     <x>325</x>
-     <y>159</y>
+     <x>366</x>
+     <y>243</y>
     </hint>
    </hints>
   </connection>
@@ -2090,8 +2118,8 @@
      <y>116</y>
     </hint>
     <hint type="destinationlabel">
-     <x>51</x>
-     <y>445</y>
+     <x>92</x>
+     <y>609</y>
     </hint>
    </hints>
   </connection>
