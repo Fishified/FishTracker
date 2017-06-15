@@ -22,6 +22,11 @@ import postProcessing
 import videoTracking
 
 
+from PyQt4 import QtGui
+from matplotlib.backends.backend_qt4agg \
+import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     
     def __init__(self, parent=None):
@@ -76,6 +81,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppAdd_RB.toggled.connect(lambda:self.ppRBstate(self.ppAdd_RB))
         self.ppSubtract_RB.toggled.connect(lambda:self.ppRBstate(self.ppSubtract_RB))
         self.csvList_LW.currentItemChanged.connect(self.plotTrack)
+        self.csvList_LW.currentItemChanged.connect(self.update_graph)
 
     def populatecameralist(self):
         self.cameralist.append(self.populatecameraslineEdit.text())
@@ -434,6 +440,27 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
         self.track_TE.append("Threshold contour area changed to %d" % self.cntareathreshold)
+        
+    def update_graph(self):
+
+        
+        listindex = self.csvList_LW.currentRow()
+        
+        df=pd.read_csv(self.trackList[listindex].filename)
+        df.columns= ['Image frame', 'x_px','y_px']
+        self.mpl.canvas.ax.clear()
+        
+        
+        self.mpl.canvas(df.plot(x='x_px',y='y_px',kind='scatter',color='Red',figsize=(10,2)))
+
+        #ax=df.plot(x='up',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
+        #self.mpl.canvas.ax.bar(5, [20,33,25,99,100], width=0.5)
+        #self.mpl.canvas.ax.scatter(df.plot(x='x_px',y='y_px',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2)))
+        #self.mpl.canvas.ax.set_xlim(xmin=0, xmax=8)
+        #self.mpl.canvas.ax.set_xticks(range(len(l)))
+        #self.mpl.canvas.ax.set_xticklabels(l)
+        #self.mpl.canvas.ax.get_yaxis().grid(True)
+        self.mpl.canvas.draw()
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
@@ -459,8 +486,11 @@ class PandasModel(QtCore.QAbstractTableModel):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self._data.columns[col]
         return None               
+    
 
 
+
+        
 app = QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)
 form = MainWindow()

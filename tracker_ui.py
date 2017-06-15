@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        MainWindow.resize(1032, 708)
+        MainWindow.resize(1032, 741)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -784,9 +784,9 @@ class Ui_MainWindow(object):
         self.groupBox_17.setObjectName(_fromUtf8("groupBox_17"))
         self.gridLayout_30 = QtGui.QGridLayout(self.groupBox_17)
         self.gridLayout_30.setObjectName(_fromUtf8("gridLayout_30"))
-        self.label_11 = QtGui.QLabel(self.groupBox_17)
-        self.label_11.setObjectName(_fromUtf8("label_11"))
-        self.gridLayout_30.addWidget(self.label_11, 0, 0, 1, 1)
+        self.mpl = MplWidget(self.groupBox_17)
+        self.mpl.setObjectName(_fromUtf8("mpl"))
+        self.gridLayout_30.addWidget(self.mpl, 0, 0, 1, 1)
         self.gridLayout_28.addWidget(self.groupBox_17, 1, 0, 1, 1)
         self.tabWidget_2.addTab(self.tab_4, _fromUtf8(""))
         self.gridLayout_14.addWidget(self.tabWidget_2, 0, 1, 1, 1)
@@ -961,7 +961,6 @@ class Ui_MainWindow(object):
         self.groupBox_14.setTitle(_translate("MainWindow", "Trajectory", None))
         self.trackPlot_L.setText(_translate("MainWindow", "Trace will appear when a trajectory file is selected ...", None))
         self.groupBox_17.setTitle(_translate("MainWindow", "Variable plot", None))
-        self.label_11.setText(_translate("MainWindow", "Variable versus frame rate plot ...", None))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_4), _translate("MainWindow", "Trajectory plot", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("MainWindow", "Post-processing", None))
         self.activePath_L.setText(_translate("MainWindow", "No path specified", None))
@@ -969,3 +968,4 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
 
+from mplwidget import MplWidget
