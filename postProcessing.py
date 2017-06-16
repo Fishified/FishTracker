@@ -54,14 +54,15 @@ class postProcessing:
     def kinematics(self):
         
         self.dfTreated['u']=self.dfTreated.x.diff()*self.framerate
-        
         self.dfTreated['v']=self.dfTreated.y.diff()*self.framerate
         self.dfTreated['up_x']=self.dfTreated['x']
         self.dfTreated['down_x']=self.dfTreated['x']
+        
         self.dfTreated.ix[(self.dfTreated['u']<0),'up_x']=None
         self.dfTreated.ix[(self.dfTreated['u']>=0),'down_x']=None
         self.dfTreated.ix[self.dfTreated['u'].isnull(),'down_x']=None
-        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up-X']=None
+        self.dfTreated.ix[self.dfTreated['u'].isnull(),'up_x']=None
+        #self.dfTreated.ix[self.dfTreated['u'].shift(-1).isnull(),'up_x']=None
        
         if 'Interpolated' in self.dfTreated.columns:
             self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x','Interpolated','Interpolated_x']]

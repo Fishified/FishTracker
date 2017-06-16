@@ -48,7 +48,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.master_calList=[]
         
         #calibrate/setup
-        self.calChosepath_B.clicked.connect(self.getPath)
+        self.calChosepath_B.clicked.connect(self.getProjectPath)
         self.calLoadCalibrate_B.clicked.connect(self.newCalibration)
         self.calMakeCalFile_B.clicked.connect(self.outputCalFile)
         self.calCalibrate_B.clicked.connect(self.doCalibration)
@@ -59,9 +59,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 #        self.cal_LW.currentItemChanged.connect(self.calActivate)
         
         #track
-        self.trkTrack_B.clicked.connect(self.play_movie)
-        self.trkLoad_B.clicked.connect(self.open)
-        self.trkPreview_B.clicked.connect(self.preview)
+        self.trkTrack_B.clicked.connect(self.trackVideo)
+        self.trkLoad_B.clicked.connect(self.videoOpen)
+        self.trkPreview_B.clicked.connect(self.previewVideo)
         self.trkContour_B.clicked.connect(self.contour)
         self.trkFramerate_LE.editingFinished.connect(self.framerateChange)
 
@@ -97,8 +97,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
        pass
     def framerateChange(self):
         self.framerate=int(self.trkFramerate_LE.text())
+        
+    """
+    video:
+        previewVideo(self)    - quick preview of selected video
+        trackVideo(self) - perform background subtraction tracking on video, output raw tracking data files
+    """
+        
+    def previewVideo(self):
+        
+        self.tracking.preview() 
 
-    def play_movie(self):
+    def trackVideo(self):
         
         self.framerate=int(self.trkFramerate_LE.text())
         self.pathThrow, self.filename=os.path.split(os.path.abspath(self.video))
@@ -128,7 +138,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         ycoord=[]
         cx=0
         cy=0
-        r=20
 
         while(True):
             t0 = time.time()
@@ -153,7 +162,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 self.track_TE.append("Tracking complete!")
                 break
             
-            originalframe=frame
             rows,cols,ch = frame.shape
             
             if transfoMat==1:
@@ -249,11 +257,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 ycoord.append(ycntcoord[biggestcontour])
                 #self.track_TE.append("Single detection: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
 
-#            
-#            if xcntcoord[biggestcontour]==0 or passFlag==True :
-#                pass
-#            else:
-#                cv2.circle(originalframe, (xcoord[-1], ycoord[-1]),r,(0, 255, 0), 3)
                 
             self.fishcoords=np.array((xcoord,ycoord),dtype=float) 
              
@@ -293,34 +296,71 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.fishcoords=np.transpose(self.fishcoords)
         self.fishcoords=pd.DataFrame(self.fishcoords)
         self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraid))
-       
-        
-    def open(self):
-    
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files( *.mp4 *.h264)")
 
+
+     
+    """
+    open file dialogs:
+        
+        getPath(self)          - set project path, copy last project calibration, clear main thread of last project
+        videoOpen(self)        - get video and set active video label
+        openCalibration(self)  - mkdir if absent, copy calibration contents over
+        openCSV(self)          - populate trackList with postProcessing instances
+        
+    """
+    def getProjectPath(self):
+        try:
+            self.lastpath=self.path
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.lastpath)
+            check=True
+        
+        except AttributeError:
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "G:\\cutvideo\\")
+            check=False
+                    
+        self.calLabelPath_L.setText(self.path)
+        self.activePath_L.setText(self.path)
+    
+        if self.calReuse_CB.isChecked()==True:
+            try:
+                os.makedirs('%s\\Calibration_files' % self.path)
+                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
+            except WindowsError:
+                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
+                        
+    def videoOpen(self): 
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files( *.mp4 *.h264)")
         self.pathLabel.setText(fileobj)
         self.video=fileobj
         self.tracking=videoTracking.VideoTracking(self.track_TE, self.video)
            
-    def preview(self):
-        
-        self.tracking.preview() 
-
-    """
-    Calibration
-    """
-    
     def openCalibration(self):
         self.calpath=QFileDialog.getExistingDirectory(self)
         try:
             os.makedirs('%s\\Calibration_files' % self.path)
         except WindowsError:
             pass
-        
-        dest="%s\\Calibration_files\\" % self.path
         copy_tree("%s\\" % self.calpath, "%s\\Calibration_files\\" % self.path)
+
+    def openCSV(self):
+        self.fileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.csv)")
+        self.appendTrackList=[postProcessing.postProcessing(self.fileobj[i],self.framerate) for i in range(len(self.fileobj))]
+
+        if len(self.trackList) == 0:
+            self.trackList=self.appendTrackList
+        else:
+            self.trackList=self.trackList+self.appendTrackList
+            
+        for i in range(len(self.trackList)):
+            self.csvList_LW.addItem(self.trackList[i].name)
+
+
+    """
+    Calibration:
         
+        newCalibration(self) - create a new 
+    """
+    
     def doCalibration(self):
         if self.calRectify_CB.isChecked()==True:
             self.rectify=True
@@ -332,23 +372,17 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def newCalibration(self):
         
-        self.calNamelist=[]
-        self.calFileobj=[]
-        self.calCameraID=[]
-        self.fullPath=[]
-
-        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.mp4 *.h264)")
+        self.calBasenames=[]
+        self.master_calList=[]
+        self.calFileobj=QFileDialog.getOpenFileNames(self,"Chose a video to calibrate", self.path, filter="Video files (*.mp4 *.h264)")
        
         for i in range(len(self.calFileobj)):
-            self.pathThrow, self.calFilename=os.path.split(os.path.abspath(self.calFileobj[i]))
-            self.fullPath.append(os.path.abspath(self.calFileobj[i]))
-            slicestr=self.calFilename[0:6]
-            self.calCameraID=self.calFilename[0:2]
-            self.calNamelist.append(slicestr)
-            self.cal_LW.addItem(self.calNamelist[i])
+            basename=os.path.basename(self.calFileobj[i])
+            print basename
+            self.cal_LW.addItem(basename)
 
-        self.toAppend_calList=[calibration.Calibration(self.calNamelist[i],self.path,self.fullPath[i],
-                                                       self.cal_TE) for i in range(len(self.calNamelist))]
+        self.toAppend_calList=[calibration.Calibration(self.calFileobj[i],
+                                                       self.cal_TE) for i in range(len(self.calFileobj))]
 
         if len(self.master_calList) == 0:
             self.master_calList=self.toAppend_calList
@@ -366,46 +400,26 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     """
     post-processing
     """
-    def openCSV(self):
 
-        self.fileobj=QFileDialog.getOpenFileNames(self,"CSV files", self.path, filter="Text Files (*.csv)")
-        self.appendTrackList=[postProcessing.postProcessing(self.fileobj[i],self.framerate) for i in range(len(self.fileobj))]
-
-        if len(self.trackList) == 0:
-            self.trackList=self.appendTrackList
-        else:
-            self.trackList=self.trackList+self.appendTrackList
-            
-        for i in range(len(self.trackList)):
-            self.csvList_LW.addItem(self.trackList[i].name)
-        
-        
     def plotTrack(self):
         try:
             listindex = self.csvList_LW.currentRow()
             self.trackList[listindex].plotTrack(self.pp_TV,self.ppFileLoaded_L,self.trackPlot_L)
-
         except IndexError:
             pass
-
-        
+ 
     def stitchPlot(self):
-       
-        self.dfs=[]
-        
         colors=['red','blue','black','darkgrey','green','magenta']
         
         for i in range(len(self.trackList)):
-            self.dfs.append(self.trackList[i].dfTreated)
             if i == 0:
-                ax=self.dfs[0].plot(x='x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
+                ax=self.trackList[i].dfTreated.plot(x='x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
             else:
-                self.dfs[i].plot(kind='scatter', x='x', y='u',ax=ax,color=colors[i]) 
+                self.trackList[i].dfTreated.plot(kind='scatter', x='x', y='u',ax=ax,color=colors[i]) 
         ax.set_xlabel('Distance (m)')
         ax.set_ylabel('u (m/s)')   
         fig = ax.get_figure()
         fig.savefig('%s\stitchPlot.png' % self.path)
-        
         time.sleep(0.1)
         
         self.dfsStacked=pd.concat(self.dfs)
@@ -456,36 +470,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.trackList[listindex].interpolate()
         
     #utilities
-    def getPath(self):
-        
-        try:
-            self.lastpath=self.path
-            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.lastpath)
-            check=True
-            
-        except AttributeError:
-            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "G:\\CutVideo\\")
-            check=False
-            
-#        if check==True:
-#            choice = QtGui.QMessageBox.question(self, "This will change project folders ...","Are you sure?",QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-#                    if choice == QtGui.QMessageBox.Yes:
-#                        print("Okay, project folder changed")
-#                        sys.exit()
-#                    else:
-                        
-        self.calLabelPath_L.setText(self.path)
-        self.activePath_L.setText(self.path)
-        
-        if self.calReuse_CB.isChecked()==True:
-            try:
-                os.makedirs('%s\\Calibration_files' % self.path)
-                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
-            except WindowsError:
-                copy_tree("%s\\Calibration_files\\" % self.lastpath,'%s\\Calibration_files' % self.path)
-                
+
     def cleanup(self):
-        #self.pwd=os.getcwd()
+        
         for fl in glob("%s\\*_orig.csv" %self.path):
             os.remove(fl)
         for fl in glob("%s\\*_treated.csv" %self.path):
@@ -501,16 +488,12 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.ppFileLoaded_L.clear()
         self.trackPlot_L.setText("Trace will appear when a trajectory file is selected ...")
 
-        
     def contour(self):
         self.cntareathreshold=int(self.contourLineEdit.text())
         self.track_TE.append("Threshold contour area changed to %d" % self.cntareathreshold)
         
     def update_graph(self):
-
-        
         listindex = self.csvList_LW.currentRow()
-        
         df=pd.read_csv(self.trackList[listindex].filename)
         df.columns= ['Image frame', 'x_px','y_px']
         self.mpl.canvas.ax.clear()
@@ -518,9 +501,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.mpl.canvas.ax.bar(5, [20,33,25,99,100], width=0.5)
         self.mpl.canvas.draw()
         
-
-
-
 class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe

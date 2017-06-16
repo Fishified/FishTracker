@@ -7,20 +7,21 @@ Created on Tue May 23 09:11:42 2017
 import cv2
 import os
 import numpy as np
+from PyQt4.QtGui import *
 
 
 from PyQt4.QtGui import QFileDialog
 
 class Calibration:
     
-    def __init__(self,name,path,fullpath,cal_TE):
-        self.name=name
-        self.path=path
-        self.fullpath=fullpath
+    def __init__(self,videoPath,cal_TE):
+
+        self.videoPath=videoPath
+        self.projectDirectory=os.path.dirname(self.videoPath)
         self.cal_TE=cal_TE
-        
+    
         try:
-            os.makedirs('%s\\Calibration_files' % self.path)
+            os.makedirs('%s\\Calibration_files' % self.projectDirectory)
         except WindowsError:
             pass
 
@@ -29,17 +30,16 @@ class Calibration:
         self.cal_TE.append("Calibration window open:")
         self.rectify=rectify
         
-        self.video=str(self.fullpath)
+        self.video=str(self.videoPath)
         self.camera = cv2.VideoCapture(self.video)
-
-          
         success, firstFrame = self.camera.read() 
-        
+
+#        if check==True:
+
         if rectify==True:
             rows,cols,ch = firstFrame.shape
             firstFrame = cv2.warpAffine(firstFrame,self.M,(cols,rows))
-
-        
+                
         self.xdist=[]
         self.ydist=[]
         self.count = 0
@@ -91,7 +91,7 @@ class Calibration:
          
     def perspectiveTransform(self):
 
-        self.video=str(self.fullpath)
+        self.video=str(self.videoPath)
         self.camera = cv2.VideoCapture(self.video)
         
         success, firstFrame = self.camera.read() #reads only the first image of the video for calibration function
