@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
-    <height>741</height>
+    <width>871</width>
+    <height>743</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="movable">
        <bool>true</bool>
@@ -952,104 +952,117 @@
                  <item row="3" column="1">
                   <widget class="QGroupBox" name="groupBox_18">
                    <property name="title">
-                    <string>GroupBox</string>
+                    <string>Tracking controls</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_26">
                     <item row="0" column="0">
-                     <widget class="QLabel" name="label_11">
+                     <widget class="QCheckBox" name="trackRectify_CB">
                       <property name="text">
-                       <string>Enter x position \</string>
+                       <string>Track on rectified video</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="0">
+                     <widget class="QSlider" name="playbackSlider">
+                      <property name="toolTip">
+                       <string>Speed up or slow down video</string>
+                      </property>
+                      <property name="minimum">
+                       <number>10</number>
+                      </property>
+                      <property name="maximum">
+                       <number>1000</number>
+                      </property>
+                      <property name="value">
+                       <number>950</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="tickPosition">
+                       <enum>QSlider::TicksBelow</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QCheckBox" name="splitCorrect_CB">
+                      <property name="text">
+                       <string>Correct for split detections</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_control_Playback">
+                      <property name="text">
+                       <string>Control video playback speed:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QPushButton" name="trkTrack_B">
+                      <property name="toolTip">
+                       <string>Starts object tracking on currently loaded video.</string>
+                      </property>
+                      <property name="text">
+                       <string>Track</string>
+                      </property>
+                      <property name="checkable">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QCheckBox" name="novidCheckBox">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Will track video, produce an output file if &quot;Produce output files&quot; is checked but will not show the video tracking.</string>
+                      </property>
+                      <property name="text">
+                       <string>Surpress video</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1">
+                     <spacer name="horizontalSpacer_10">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item row="5" column="1">
+                     <widget class="QLabel" name="playBackSpeed_L">
+                      <property name="text">
+                       <string>TextLabel</string>
                       </property>
                      </widget>
                     </item>
                    </layout>
                   </widget>
                  </item>
-                 <item row="2" column="1">
-                  <widget class="QCheckBox" name="splitCorrect_CB">
-                   <property name="text">
-                    <string>Correct for split detections</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <widget class="QPushButton" name="trkTrack_B">
-                   <property name="toolTip">
-                    <string>Starts object tracking on currently loaded video.</string>
-                   </property>
-                   <property name="text">
-                    <string>Track</string>
-                   </property>
-                   <property name="checkable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="8" column="1">
                   <widget class="QTextBrowser" name="track_TE"/>
-                 </item>
-                 <item row="6" column="1">
-                  <widget class="QLabel" name="label_control_Playback">
-                   <property name="text">
-                    <string>Control video playback speed:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QCheckBox" name="novidCheckBox">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Will track video, produce an output file if &quot;Produce output files&quot; is checked but will not show the video tracking.</string>
-                   </property>
-                   <property name="text">
-                    <string>Surpress video</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
                  </item>
                  <item row="9" column="1">
                   <widget class="QLabel" name="label_21">
                    <property name="text">
                     <string>Help box:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="1">
-                  <widget class="QSlider" name="playbackSlider">
-                   <property name="toolTip">
-                    <string>Speed up or slow down video</string>
-                   </property>
-                   <property name="minimum">
-                    <number>10</number>
-                   </property>
-                   <property name="maximum">
-                    <number>1000</number>
-                   </property>
-                   <property name="value">
-                    <number>950</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QCheckBox" name="trackRectify_CB">
-                   <property name="text">
-                    <string>Track on rectified video</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1952,7 +1965,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1032</width>
+     <width>871</width>
      <height>21</height>
     </rect>
    </property>

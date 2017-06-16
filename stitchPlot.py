@@ -27,7 +27,8 @@ class stitchPlot:
                 ax=self.dfs[0].plot(x='x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
             else:
                 self.dfs[i].plot(kind='scatter', x='x', y='u',ax=ax,color=colors[i]) 
-                
+        ax.set_xlabel('Distance (m)')
+        ax.set_ylabel('u (m/s)')   
         fig = ax.get_figure()
         fig.savefig('%s\stitchPlot.png' % self.items[0].path)
         

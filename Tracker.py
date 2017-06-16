@@ -20,7 +20,6 @@ import tracker_ui
 import calibration
 import postProcessing
 import videoTracking
-import stitchPlot
 
 
 from PyQt4 import QtGui
@@ -69,6 +68,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.gaussSlider.valueChanged.connect(self.gaussSliderChange)
         self.medianSlider.valueChanged.connect(self.medianSliderChange)
         self.kernelSlider.valueChanged.connect(self.kernelSliderChange)
+        self.playbackSlider.valueChanged.connect(self.playbackSliderChange)
         
         #post-process
         self.ppFileOpen_B.clicked.connect(self.openCSV)
@@ -93,6 +93,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.medianValueLabel.setText(str(self.medianSlider.value()))
     def kernelSliderChange(self):
         self.kernelValueLabel.setText(str(self.kernelSlider.value()))
+    def playbackSliderChange(self):
+       pass
     def framerateChange(self):
         self.framerate=int(self.trkFramerate_LE.text())
 
@@ -129,7 +131,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         r=20
 
         while(True):
-            
+            t0 = time.time()
+
+
             if count==0:
                 self.track_TE.setText("Tracking. Click video window and press 'q' or click 'Stop' button to cancel")
             if self.trkTrack_B.isChecked()== False:
@@ -221,7 +225,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
-                self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
+                #self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
 #                self.track_TE.append("x position : %d" % float(xcntcoord[-1]))
 #                self.track_TE.append("y position : %d" % float(ycntcoord[-1]))
             
@@ -234,8 +238,8 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 xcoord.append(xcoordCorrected)
                 ycoord.append(ycoordCorrected)
                 self.track_TE.append("Split correction applied: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
-                self.track_TE.append("Contour 1: x-coord %d, y-coord %d" % (xcntcoord[0], ycntcoord[0]))
-                self.track_TE.append("Contour 2: x-coord %d, y-coord %d" % (xcntcoord[1], ycntcoord[1]))
+                #self.track_TE.append("Contour 1: x-coord %d, y-coord %d" % (xcntcoord[0], ycntcoord[0]))
+                #self.track_TE.append("Contour 2: x-coord %d, y-coord %d" % (xcntcoord[1], ycntcoord[1]))
                 
                 
             else:
@@ -243,7 +247,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 biggestcontour=cntarea.index(max(cntarea))
                 xcoord.append(xcntcoord[biggestcontour])
                 ycoord.append(ycntcoord[biggestcontour])
-                self.track_TE.append("Single detection: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
+                #self.track_TE.append("Single detection: x-coord %d, y-coord %d" % (xcoord[-1], ycoord[-1]))
 
 #            
 #            if xcntcoord[biggestcontour]==0 or passFlag==True :
@@ -272,7 +276,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
             self.framerate=float(self.framerate)
             a=(1/self.framerate)*(100/(self.vidSpeedMultiplier))
             
-            
+            t1 = time.time()
+            total = t1-t0
+            print total
             time.sleep(a)
                 #breaks out 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -291,7 +297,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
     def open(self):
     
-        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files *.h264")
+        fileobj=QFileDialog.getOpenFileName(self,"Video file", self.path,filter="Video Files( *.mp4 *.h264)")
 
         self.pathLabel.setText(fileobj)
         self.video=fileobj
@@ -331,7 +337,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calCameraID=[]
         self.fullPath=[]
 
-        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.h264)")
+        self.calFileobj=QFileDialog.getOpenFileNames(self,"Video files", self.path, filter="Video files (*.mp4 *.h264)")
        
         for i in range(len(self.calFileobj)):
             self.pathThrow, self.calFilename=os.path.split(os.path.abspath(self.calFileobj[i]))
@@ -384,8 +390,26 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
 
         
     def stitchPlot(self):
-        stitchPlot.stitchPlot(self.trackList)
+       
+        self.dfs=[]
         
+        colors=['red','blue','black','darkgrey','green','magenta']
+        
+        for i in range(len(self.trackList)):
+            self.dfs.append(self.trackList[i].dfTreated)
+            if i == 0:
+                ax=self.dfs[0].plot(x='x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
+            else:
+                self.dfs[i].plot(kind='scatter', x='x', y='u',ax=ax,color=colors[i]) 
+        ax.set_xlabel('Distance (m)')
+        ax.set_ylabel('u (m/s)')   
+        fig = ax.get_figure()
+        fig.savefig('%s\stitchPlot.png' % self.path)
+        
+        time.sleep(0.1)
+        
+        self.dfsStacked=pd.concat(self.dfs)
+        self.dfsStacked.to_csv("stacked.csv")
         self.stitchPlot_L.setPixmap(QPixmap("%s\stitchPlot.png" %self.path))
         
     def ppPopulateStitchList(self):
@@ -493,6 +517,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         self.mpl.canvas.ax.bar(5, [20,33,25,99,100], width=0.5)
         self.mpl.canvas.draw()
+        
+
+
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
