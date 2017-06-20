@@ -4,25 +4,23 @@ import sys
 import os
 import time
 from glob import glob
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from PyQt4 import QtCore
 #from PyQt4.QtGui import QFileDialog
 
 import cv2
 import numpy as np
 import pandas as pd
-import shutil
 from distutils.dir_util import copy_tree
 
-
+from PyQt4 import QtCore
 import tracker_ui
 import calibration
 import postProcessing
 import videoTracking
 
 
-from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg \
 import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -312,11 +310,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         try:
             self.lastpath=self.path
             self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", self.lastpath)
-            check=True
-        
         except AttributeError:
-            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "G:\\cutvideo\\")
-            check=False
+            self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "C:\\Users\\tempo\\Desktop\\Trial_1")
+
                     
         self.calLabelPath_L.setText(self.path)
         self.activePath_L.setText(self.path)
@@ -411,19 +407,23 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def stitchPlot(self):
         colors=['red','blue','black','darkgrey','green','magenta']
         
+        
+        
         for i in range(len(self.trackList)):
             if i == 0:
-                ax=self.trackList[i].dfTreated.plot(x='x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
+                ax=self.trackList[i].dfTreated.plot(x='up_x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
+                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5)
+                
             else:
-                self.trackList[i].dfTreated.plot(kind='scatter', x='x', y='u',ax=ax,color=colors[i]) 
+                self.trackList[i].dfTreated.plot(kind='scatter', x='up_x', y='u',ax=ax,color=colors[i])
+                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5)
+                
         ax.set_xlabel('Distance (m)')
         ax.set_ylabel('u (m/s)')   
         fig = ax.get_figure()
         fig.savefig('%s\stitchPlot.png' % self.path)
         time.sleep(0.1)
         
-        self.dfsStacked=pd.concat(self.dfs)
-        self.dfsStacked.to_csv("stacked.csv")
         self.stitchPlot_L.setPixmap(QPixmap("%s\stitchPlot.png" %self.path))
         
     def ppPopulateStitchList(self):
