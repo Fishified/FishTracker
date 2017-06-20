@@ -63,11 +63,14 @@ class postProcessing:
         self.dfTreated.ix[self.dfTreated['u'].isnull(),'down_x']=None
         self.dfTreated.ix[self.dfTreated['u'].isnull(),'up_x']=None
         #self.dfTreated.ix[self.dfTreated['u'].shift(-1).isnull(),'up_x']=None
+        
+        self.dfTreated['V']=np.sqrt((self.dfTreated.u**2)+(self.dfTreated.v**2))
+        
        
         if 'Interpolated' in self.dfTreated.columns:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x','Interpolated','Interpolated_x']]
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x','V','Interpolated','Interpolated_x']]
         else:
-            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x']]
+            self.dfTreated = self.dfTreated[['Image frame','x_px','y_px','x','y','u','v','up_x','down_x','V']]
         
     def plotTrack(self,tableView,textLabel,plotLabel):
         
@@ -77,7 +80,7 @@ class postProcessing:
         self.textLabel.setText("%s\%s.csv" % (self.path, self.name))      
         self.tableView.setModel(PandasModel(self.dfTreated))
         
-        ax=self.dfTreated.plot(x='up_x',y='y',kind='scatter',xlim=[0,10],ylim=[0,0.7],color='Red',figsize=(10,2))
+        ax=self.dfTreated.plot(x='up_x',y='y',kind='scatter',xlim=[0,10],ylim=[-0.3,0.7],color='Red')
         self.dfTreated.plot(kind='scatter', x='down_x', y='y',ax=ax,color='Blue')
         
         if 'Interpolated' in self.dfTreated.columns:
@@ -85,12 +88,16 @@ class postProcessing:
         fig = ax.get_figure()
         fig.savefig('%s\%s.png' % (self.path,self.name))
         self.plotLabel.setPixmap(QPixmap("%s\%s.png" % (self.path,self.name)))
+        
+        
+        
     
     def blankRows(self,rowIndices):
-        
         self.rowIndices=rowIndices
         for i in range(len(self.rowIndices)):
-            self.dfTreated.iloc[self.rowIndices[i].row(),1:10]=None              
+            self.dfTreated.iloc[self.rowIndices[i].row(),1:10]=None 
+        self.kinematics()
+        self.write()             
         self.plotTrack(self.tableView,self.textLabel,self.plotLabel)
         
     def shiftFrames(self,adjust,state):

@@ -231,7 +231,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
-                #self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
+                self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))
 #                self.track_TE.append("x position : %d" % float(xcntcoord[-1]))
 #                self.track_TE.append("y position : %d" % float(ycntcoord[-1]))
             
@@ -296,7 +296,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.fishcoords.to_csv("%s\\%s_raw.csv" %(self.path,self.cameraid))
 
 
-     
     """
     open file dialogs:
         
@@ -313,7 +312,6 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         except AttributeError:
             self.path=QFileDialog.getExistingDirectory(self,"Choose project folder", "C:\\Users\\tempo\\Desktop\\Trial_1")
 
-                    
         self.calLabelPath_L.setText(self.path)
         self.activePath_L.setText(self.path)
     
@@ -411,7 +409,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         
         for i in range(len(self.trackList)):
             if i == 0:
-                ax=self.trackList[i].dfTreated.plot(x='up_x',y='u',kind='scatter',xlim=[0,10],color=colors[i],figsize=(10,2))
+                ax=self.trackList[i].dfTreated.plot(x='up_x',y='u',kind='scatter',xlim=[0,10],color=colors[i])
                 self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5)
                 
             else:
