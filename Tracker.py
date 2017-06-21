@@ -19,6 +19,11 @@ import tracker_ui
 import calibration
 import postProcessing
 import videoTracking
+import matplotlib
+matplotlib.style.use('seaborn-darkgrid')
+import matplotlib.pyplot as plt
+plt.rc('font', family='serif') 
+plt.rc('font', serif='Times New Roman') 
 
 
 from matplotlib.backends.backend_qt4agg \
@@ -405,19 +410,18 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def stitchPlot(self):
         colors=['red','blue','black','darkgrey','green','magenta']
         
-        
-        
         for i in range(len(self.trackList)):
             if i == 0:
-                ax=self.trackList[i].dfTreated.plot(x='up_x',y='u',kind='scatter',xlim=[0,10],color=colors[i])
-                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5)
-                
+                ax=self.trackList[i].dfTreated.plot(kind='scatter', x='up_x',y='u',xlim=[0,10],color=colors[i])
+                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5, figsize=[7,2], label = self.trackList[i].name)                
             else:
                 self.trackList[i].dfTreated.plot(kind='scatter', x='up_x', y='u',ax=ax,color=colors[i])
-                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5)
+                self.trackList[i].dfTreated.plot(kind='scatter', x='down_x', y='u',ax=ax,color=colors[i],alpha=0.5, figsize=[7,2], label = self.trackList[i].name )
                 
         ax.set_xlabel('Distance (m)')
-        ax.set_ylabel('u (m/s)')   
+        ax.set_ylabel('u (m/s)')
+        plt.legend(loc='best',prop={'size':10}, frameon=True, shadow=True, bbox_to_anchor=(1.1, 1.1))
+        plt.title('Velocity Plot', style='italic')
         fig = ax.get_figure()
         fig.savefig('%s\stitchPlot.png' % self.path)
         time.sleep(0.1)

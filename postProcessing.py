@@ -23,6 +23,7 @@ class postProcessing:
         self.framerate=framerate
         self.df=pd.read_csv(self.fileobj)
         self.path, self.filename=os.path.split(os.path.abspath(self.fileobj))
+        #self.rootname, self.ext=os.path.splitext(os.path.abspath(self.fileobj))
         self.cameraid=self.filename[0:2]
         self.name="Camera_%s" % self.cameraid
 
@@ -80,11 +81,15 @@ class postProcessing:
         self.textLabel.setText("%s\%s.csv" % (self.path, self.name))      
         self.tableView.setModel(PandasModel(self.dfTreated))
         
-        ax=self.dfTreated.plot(x='up_x',y='y',kind='scatter',xlim=[0,10],ylim=[-0.3,0.7],color='Red')
-        self.dfTreated.plot(kind='scatter', x='down_x', y='y',ax=ax,color='Blue')
+        ax=self.dfTreated.plot(x='up_x',y='y',kind='scatter',xlim=[0,10],ylim=[-0.3,0.7],color='Red', figsize=[7,2], label='Upstream')
+        self.dfTreated.plot(kind='scatter', x='down_x', y='y',ax=ax,color='Blue', figsize=[7,2], label='Downstream')
         
         if 'Interpolated' in self.dfTreated.columns:
-            self.dfTreated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow') 
+            self.dfTreated.plot(kind='scatter', x='Interpolated_x', y='y',ax=ax,color='yellow', figsize=[7,2]) 
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.legend(loc='best',prop={'size':10}, frameon=True, shadow=True, bbox_to_anchor=(1.1, 1.1))
+        plt.title('Fish Track', style='italic')
         fig = ax.get_figure()
         fig.savefig('%s\%s.png' % (self.path,self.name))
         self.plotLabel.setPixmap(QPixmap("%s\%s.png" % (self.path,self.name)))
