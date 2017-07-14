@@ -49,6 +49,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
         self.calfile=[]
         self.trackList=[]
         self.master_calList=[]
+        self.masks=[]
         
         #calibrate/setup
         self.calChosepath_B.clicked.connect(self.getProjectPath)
@@ -101,6 +102,7 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
     def framerateChange(self):
         self.framerate=int(self.trkFramerate_LE.text())
         
+
     """
     video:
         previewVideo(self)    - quick preview of selected video
@@ -234,6 +236,9 @@ class MainWindow(QMainWindow, tracker_ui.Ui_MainWindow):
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
         
+                
+                
+                
                 xcntcoord.append(cx)
                 ycntcoord.append(cy)
                 self.track_TE.append("coutour area: %d" % float(cv2.contourArea(c)))

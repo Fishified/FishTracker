@@ -189,7 +189,9 @@ class Calibration:
         self.cal_TE.append("O.k., each pixel equals %s meters in real life or 0.1 m equals %d pixels" % (deltax, pixperdist))
         self.cal_TE.append("Point 1 and 2 are %.2f m and %.2f m from the flume entrance" % (float(self.distance)+(self.xdist[2]-self.xdist[0])*deltax,float(self.distance)+(self.xdist[2]-self.xdist[1])*deltax))
         
-        f = open('%s/Calibration_files/%d.cal' %(self.path,float(self.cameraID)), 'w+') #opens file and allows it to be overwritten 
+        f = open('%s/Calibration_files/%d.cal' %(self.projectDirectory,float(self.cameraID)), 'w+') #opens file and allows it to be overwritten 
+        print "hi"
+                
         f.write(self.trial+'\n')
         f.write(self.cameraID+'\n')
         f.write(str(deltax)+'\n')
@@ -198,4 +200,7 @@ class Calibration:
         f.write(str(self.ydist[2])+'\n')
         f.close()
         
-        np.savetxt('%s/Calibration_files/%d_matrix.csv' %(self.path,float(self.cameraID)), self.M, delimiter=',')
+        self.cal_TE.append("Calibration file saved")
+        
+        
+        #np.savetxt('%s/Calibration_files/%d_matrix.csv' %(self.path,float(self.cameraID)), self.M, delimiter=',')
